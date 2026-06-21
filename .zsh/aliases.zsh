@@ -4,16 +4,9 @@
 alias a="ansible"
 alias ap="ansible-playbook"
 alias dt="datree"
-
-# ALIAS COMMANDS
-# alias ls="exa --icons --group-directories-first"
-# alias ll="exa --icons --group-directories-first -l"
-alias g="goto"
 alias grep='grep --color'
 alias cat="bat"
 alias ls="eza"
-
-# alias cpr="code $HOME/Developers/projects"
 
 # alias air='$(go env GOPATH)/bin/air'
 # alias swag='$(go env GOPATH)/bin/swag'
@@ -21,7 +14,8 @@ alias ls="eza"
 alias vim="nvim"
 alias npmpublic="npm config set registry https://registry.npmjs.org/ && npm config get registry"
 alias npmlocal="npm set registry http://localhost:4873; npm config get registry"
-alias guid="uuidgen"
+alias uuid="uuidgen | tr '[:upper:]' '[:lower:]'"
+alias guid="uuid"
 alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 alias gensalt32="xxd -g 2 -l 32 -p /dev/random | tr -d '\n'"
 alias gensalt16="xxd -g 2 -l 16 -p /dev/random | tr -d '\n'"
