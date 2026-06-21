@@ -1,38 +1,22 @@
-# find out which distribution we are running on
-LFILE="/etc/*-release"
-MFILE="/System/Library/CoreServices/SystemVersion.plist"
-if [[ -f $LFILE ]]; then
-  _distro=$(awk '/^ID=/' /etc/*-release | awk -F'=' '{ print tolower($2) }')
-elif [[ -f $MFILE ]]; then
-  _distro="macos"
+#! /bin/zsh
+
+# starship
+if [[ -x "$(command -v starship)" ]]; then
+  eval "$(starship init zsh)"
+else
+  echo "starship not found, trying installing..."
+
+  if command -v brew >/dev/null 2>&1; then
+    brew install starship
+  elif command -v apt-get >/dev/null 2>&1; then
+    sudo apt-get install starship
+  elif command -v yum >/dev/null 2>&1; then
+    sudo yum install starship
+  elif command -v apk >/dev/null 2>&1; then
+    sudo apk add starship
+  elif command -v pacman >/dev/null 2>&1; then
+    sudo pacman -S starship
+  else
+    echo "Could not find a package manager to install starship. Please install it manually."
+  fi
 fi
-
-# set an icon based on the distro
-# make sure your font is compatible with https://github.com/lukas-w/font-logos
-case $_distro in
-    *kali*)                  ICON="ﴣ";;
-    *arch*)                  ICON="";;
-    *debian*)                ICON="";;
-    *raspbian*)              ICON="";;
-    *ubuntu*)                ICON="";;
-    *elementary*)            ICON="";;
-    *fedora*)                ICON="";;
-    *coreos*)                ICON="";;
-    *gentoo*)                ICON="";;
-    *mageia*)                ICON="";;
-    *centos*)                ICON="";;
-    *opensuse*|*tumbleweed*) ICON="";;
-    *sabayon*)               ICON="";;
-    *slackware*)             ICON="";;
-    *linuxmint*)             ICON="";;
-    *alpine*)                ICON="";;
-    *aosc*)                  ICON="";;
-    *nixos*)                 ICON="";;
-    *devuan*)                ICON="";;
-    *manjaro*)               ICON="";;
-    *rhel*)                  ICON="";;
-    *macos*)                 ICON="";;
-    *)                       ICON="";;
-esac
-
-export STARSHIP_DISTRO="$ICON"
