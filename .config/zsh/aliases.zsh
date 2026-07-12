@@ -5,12 +5,32 @@
 #
 alias vim="nvim"
 alias dt="datree"
-alias grep='grep --color'
+alias df="df -h"
+alias grep="rg --color=auto"
+alias diff="diff --color=auto"
+
+# Suffix aliases
+alias -s md="bat"
+alias -s go="$EDITOR"
+alias -s js="$EDITOR"
+alias -s jsx="$EDITOR"
+alias -s ts="$EDITOR"
+alias -s tsx="$EDITOR"
+alias -s yaml="bat -l yaml"
+alias -s json="jq ."
+
+# global aliases
+alias -g C="| pbcopy"
+alias -g L="| less"
+alias -g JQ="| jq ."
+alias -g NE="2>/dev/null"
+alias -g DN=">/dev/null"
+alias -g NUL=">/dev/null 2>&1"
 
 if command -v bat >/dev/null 2>&1; then
     alias cat="bat"
 else
-    # alias cat="cat"
+    alias cat="cat"
 fi
 
 if command -v eza >/dev/null 2>&1; then
@@ -47,7 +67,7 @@ alias gensalt8="xxd -g 2 -l 8 -p /dev/random | tr -d '\n'"
 codex-tmux-experimental() {
   # use current folder name for a readable session label
   local session="codex-${PWD##*/}"
-  OPENAI_BASE_URL=http://0.0.0.0:8787/v1 tmux new-session -A -s "$session" -c "$PWD" "codex"
+  OPENAI_BASE_URL=http://localhost:8787 tmux new-session -A -s "$session" -c "$PWD" "codex"
 }
 
 
@@ -66,7 +86,7 @@ copilot-tmux() {
 claude-tmux-experimental() {
   # use current folder name for a readable session label
   local session="claude-${PWD##*/}"
-  ANTHROPIC_BASE_URL=http://0.0.0.0:8787 tmux new-session -A -s "$session" -c "$PWD" "claude"
+  ANTHROPIC_BASE_URL=http://localhost:8787 tmux new-session -A -s "$session" -c "$PWD" "claude"
 }
 
 claude-tmux() {
@@ -81,4 +101,13 @@ alias vibecode-claude-stable="claude-tmux"
 alias vibecode-codex="codex-tmux-experimental"
 alias vibecode-codex-stable="codex-tmux"
 
-export DOPPLER_TOKEN="$(pass show doppler/token)"
+DOPPLER_PROJECT=$(doppler configure get project --plain)
+
+if [ -n "$DOPPLER_PROJECT" ]; then
+  DOPPLER_TOKEN=$(doppler configure get token --plain)
+  DOPPLER_CONFIG=$(doppler configure get config --plain)
+fi
+
+alias k="kubectl"
+# alias docker="podman"
+# export DOPPLER_TOKEN="$(pass show doppler/token)"

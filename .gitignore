@@ -1,0 +1,20 @@
+# Zsh compiled files
+*.zwc
+.zcompdump*
+
+# Machine-local overrides
+local.zsh
+/.config/git/conf.d/*
+!/.config/git/conf.d/*.example
+!/.config/git/conf.d/README.md
+
+# macOS metadata
+.DS_Store
+
+# Tutorial outline
+TUTORIAL.md
+
+# installed plugins
+.config/tmux/plugins/
+.config/zsh/plugins/
+.config/zsh/history

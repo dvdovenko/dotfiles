@@ -1,0 +1,9 @@
+[core]
+	sshCommand = ssh -i ~/.ssh/id_<repo>
+
+[user]
+	name = Your Name
+	email = you@example.com
+
+[includeIf "gitdir:~/path/to/repo/"]
+	path = ~/.config/git/conf.d/<repo>.gitconfig
