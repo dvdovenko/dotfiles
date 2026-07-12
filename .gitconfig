@@ -1,0 +1,30 @@
+[core]
+	pager = delta
+  editor = vim
+	sshCommand = ssh -i ~/.ssh/id_rsa
+
+[interactive]
+	diffFilter = delta --color-only
+[merge]
+	conflictstyle = diff3
+[diff]
+	colorMoved = default
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+
+# Machine-local overrides (untracked). Copy the matching .example file in
+# .config/git/conf.d/ and fill in real values — see .config/git/conf.d/README.md.
+[include]
+    path = ~/.config/git/conf.d/default.gitconfig
+
+[pull]
+	rebase = true
+[push]
+	autoSetupRemote = true

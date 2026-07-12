@@ -1,0 +1,41 @@
+name: nix checks
+
+on:
+  push:
+    paths:
+      - "nix/**"
+      - ".github/workflows/nix-checks.yml"
+  pull_request:
+    paths:
+      - "nix/**"
+
+jobs:
+  # Native build on a Linux runner: the one target that can actually be
+  # built (not just evaluated) without a remote/linux builder.
+  vps-x86_64-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: |
+          nix build --impure './nix#homeConfigurations."vps@x86_64-linux".activationPackage' --no-link
+
+  # Can't build (no aarch64-linux builder on this runner), but a full eval
+  # of activationPackage.drvPath still catches broken module options/imports.
+  vps-aarch64-linux-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: |
+          nix eval --impure './nix#homeConfigurations."vps@aarch64-linux".activationPackage.drvPath'
+
+  # Native build on Apple Silicon: exercises the nix-darwin + homebrew
+  # module wiring (activation itself doesn't run in CI, just the build).
+  darwin:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: |
+          nix build --impure ./nix#darwinConfigurations.danylo-mbp.system --no-link

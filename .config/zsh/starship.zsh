@@ -18,5 +18,9 @@ else
     sudo pacman -S starship
   else
     echo "Could not find a package manager to install starship. Please install it manually."
+
+    return
   fi
+
+  eval "$(starship init zsh)"
 fi

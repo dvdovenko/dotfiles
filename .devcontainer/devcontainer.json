@@ -1,0 +1,18 @@
+{
+  "name": "dotfiles bootstrap test",
+  // Plain Ubuntu devcontainer base: has git/curl/sudo and a non-root
+  // "vscode" user out of the box, nothing dotfiles-specific pre-installed.
+  // The point is to prove scripts/bootstrap.sh works end to end
+  // (install Nix, clone/activate) on a box that starts from nothing, the
+  // same way a fresh VPS would.
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "remoteUser": "vscode",
+  // home/dotfiles.nix derives the symlink source from home.homeDirectory +
+  // "/dotfiles" — NOT from bootstrap.sh's DOTFILES_DIR — so the repo has to
+  // actually live at $HOME/dotfiles or the symlinks home-manager creates
+  // dangle. Override the devcontainer tool's default /workspaces/<name>
+  // mount point rather than fighting that with DOTFILES_DIR.
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/dotfiles,type=bind,consistency=cached",
+  "workspaceFolder": "/home/vscode/dotfiles",
+  "postCreateCommand": "bash scripts/bootstrap.sh"
+}
