@@ -135,15 +135,6 @@ source $ZSH/oh-my-zsh.sh
 [[ -f $ZDOTDIR/starship.zsh ]] && source $ZDOTDIR/starship.zsh
 [[ -f $ZDOTDIR/zoxide.zsh ]] && source $ZDOTDIR/zoxide.zsh
 
-# =========================================================
-# Node / NVM
-# =========================================================
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
-[ -s "$NVM_DIR/bash_completion" ] && source "$NVM_DIR/bash_completion"
-
-
 # User configuration
 
 PATH="$HOME/.go/bin:$PATH"
