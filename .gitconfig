@@ -1,6 +1,8 @@
 [core]
 	pager = delta
   editor = vim
+	sshCommand = ssh -i ~/.ssh/id_rsa
+
 [interactive]
 	diffFilter = delta --color-only
 [merge]
