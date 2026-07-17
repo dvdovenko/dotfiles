@@ -1,17 +1,17 @@
 # dotfiles
 
-Personal configuration files, managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal configuration files. Installed and kept in sync via a
+[nix-darwin](https://github.com/nix-darwin/nix-darwin) + [home-manager](https://github.com/nix-community/home-manager)
+flake — see [`nix/README.md`](nix/README.md) for the actual install/update
+commands, on macOS or on a Linux/VPS box. This root repo just holds the
+tracked config files themselves; the `nix/` flake is what symlinks them into
+`$HOME` and installs the packages they need.
 
 ## Layout
-
-This repo is a single Stow package: every file/directory at the repo root mirrors
-its target location in `$HOME`.
 
 ```
 .
 ├── .zshenv                 -> ~/.zshenv (sets ZDOTDIR, read before anything else)
-├── .profile                -> ~/.profile (POSIX login-shell fallback)
-├── .bashrc                 -> ~/.bashrc
 ├── .vimrc                  -> ~/.vimrc
 ├── .gitconfig              -> ~/.gitconfig
 ├── .config/
@@ -20,80 +20,52 @@ its target location in `$HOME`.
 │   ├── tmux/tmux.conf       -> ~/.config/tmux/tmux.conf
 │   ├── vim/.vimrc           -> ~/.config/vim/.vimrc
 │   └── starship.toml        -> ~/.config/starship.toml
-└── custom-scripts/         -> ~/custom-scripts/ (helper scripts, not symlinked configs)
+├── scripts/         -> ~/scripts/ (helper scripts, not symlinked)
+└── nix/                     -> nix-darwin + home-manager flake (packages, macOS
+                                defaults, Homebrew, and the symlinks above)
 ```
 
 zsh reads `~/.zshenv` before it knows about `$ZDOTDIR`, so that one file has to live
 at the repo root; everything else zsh-related lives under `.config/zsh` and is found
 automatically once `ZDOTDIR` is exported.
 
-## Prerequisites
+The first `zsh`/`tmux`/`nvim` launch after installing self-installs oh-my-zsh, its
+zsh plugins, and NvChad's plugins respectively — that part isn't managed by Nix,
+see [`nix/README.md`](nix/README.md) for why.
+
+## Install / update
+
+One-liner, any OS, installs Nix itself if it's missing (VPS, devcontainer,
+OrbStack VM, ...):
 
 ```bash
-make bootstrap   # installs stow, git, zsh, tmux, neovim, starship, fzf, zoxide
+curl -fsSL https://raw.githubusercontent.com/dvdovenko/dotfiles/main/scripts/bootstrap.sh | bash
 ```
 
-`bootstrap` uses Homebrew on macOS and `apt` on Debian/Ubuntu. Individual tools
-(oh-my-zsh, its plugins, tmux's TPM, NvChad, the vim "awesome" runtime) self-install
-the first time you start zsh/tmux/nvim, so a plain `make setup` (below) is normally
-enough — `make bootstrap` mainly exists to unblock `stow` itself, and the shell
-package managers, on a box that has neither.
-
-## Install
-
-Clone the repo and stow it into your home directory:
+Or manually — macOS:
 
 ```bash
-git clone <repo-url> ~/dotfiles
+git clone git@github.com:dvdovenko/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-make setup
+nix run nix-darwin -- switch --flake ~/dotfiles/nix   # first time only
+darwin-rebuild switch --flake ~/dotfiles/nix           # every update after
 ```
 
-This installs prerequisites, symlinks every file in this repo into the matching path
-under `~`, and installs Nerd Fonts. The first `zsh`/`tmux`/`nvim` launch afterwards
-self-installs oh-my-zsh, zsh plugins, TPM and NvChad's plugins respectively.
-
-If a target file already exists (e.g. a default `~/.zshrc` or `~/.gitconfig` from an
-earlier setup), back it up or remove it first, then re-run:
+Any Linux box / VPS with Nix installed (no NixOS or root required, any user):
 
 ```bash
-make dry-run   # shows what would happen without making changes
+git clone git@github.com:dvdovenko/dotfiles.git ~/dotfiles
+nix run home-manager -- switch --flake ~/dotfiles/nix#vps@x86_64-linux --impure
 ```
 
-## Updating
-
-Pull the latest changes and re-stow to pick up any new files:
-
-```bash
-make update
-```
-
-## Uninstall
-
-Remove all symlinks created by Stow without deleting the source files:
-
-```bash
-make uninstall
-```
+`make darwin-bootstrap|darwin-switch|vps-switch|vps-build|bootstrap` wrap
+these from the repo root. Full details, prerequisites, and what each file in
+`nix/` does are in [`nix/README.md`](nix/README.md).
 
 ## Extra setup
 
-`custom-scripts/fonts.sh` installs Nerd Fonts (used by Starship/tmux). Run it on its
-own, or run `make setup` to install dotfiles and fonts together:
+`scripts/fonts.sh` installs Nerd Fonts (used by Starship/tmux):
 
 ```bash
-make fonts   # just the fonts
-make setup   # install + fonts
+./scripts/fonts.sh
 ```
-
-## Makefile targets
-
-| Target      | Description                                  |
-|-------------|-----------------------------------------------|
-| `bootstrap` | Install OS packages (stow, zsh, tmux, neovim, starship, fzf, zoxide) |
-| `install`   | Stow all dotfiles into `$HOME`                |
-| `update`    | `git pull` + re-stow                          |
-| `uninstall` | Remove symlinks created by Stow               |
-| `dry-run`   | Preview Stow actions without applying them    |
-| `fonts`     | Install Nerd Fonts via `custom-scripts/fonts.sh` |
-| `setup`     | `bootstrap` + `install` + `fonts`             |
