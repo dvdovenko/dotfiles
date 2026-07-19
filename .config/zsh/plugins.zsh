@@ -7,14 +7,16 @@ log() {
 }
 
 # Script to install zsh plugins: zsh-autosuggestions and zsh-syntax-highlighting
-
-# Ensure oh-my-zsh is installed
-if [ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]; then
-    echo "oh-my-zsh is not installed. Installing oh-my-zsh..."
-
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
-    source $HOME/.zshrc
+# Install oh-my-zsh if missing (fresh machine bootstrap)
+if [[ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]]; then
+  # A container volume mounted at ~/.oh-my-zsh (to persist the install across
+  # rebuilds) pre-creates this as an empty directory before anything's ever
+  # installed into it. The installer refuses to run against ANY pre-existing
+  # directory, even an empty one — clear it first when that's all it is.
+  [[ -d "$HOME/.oh-my-zsh" ]] && rmdir "$HOME/.oh-my-zsh" 2>/dev/null
+  echo "oh-my-zsh not found, installing..."
+  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
+    "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
 ZSH_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
@@ -47,48 +49,8 @@ zplugin-update() {
 _zplugin_load unixorn fzf-zsh-plugin
 _zplugin_load zdharma-continuum fast-syntax-highlighting
 _zplugin_load djui alias-tips
-# _zplugin_load zsh-users zsh-autosuggestions
-# _zplugin_load zsh-users zsh-syntax-highlighting
-
-# # Install fzf-zsh-plugin
-# if [ ! -d "$ZSH_DIR/plugins/fzf-zsh-plugin" ]; then
-#     echo "Installing fzf-zsh-plugin..."
-#     git clone --depth 1 https://github.com/unixorn/fzf-zsh-plugin.git "$ZSH_DIR/plugins/fzf-zsh-plugin"
-# else
-#     log "fzf-zsh-plugin is already installed."
-# fi
-
-# # Install fast-syntax-highlighting
-# if [ ! -d "$ZSH_DIR/plugins/fast-syntax-highlighting" ]; then
-#     echo "Installing fast-syntax-highlighting..."
-#     git clone https://github.com/zdharma-continuum/fast-syntax-highlighting.git "$ZSH_DIR/plugins/fast-syntax-highlighting"
-# else
-#     log "fast-syntax-highlighting is already installed."
-# fi
-
-# # Install alias-tips
-# if [ ! -d "$ZSH_DIR/plugins/alias-tips" ]; then
-#     echo "Installing alias-tips..."
-#     git clone https://github.com/djui/alias-tips.git "$ZSH_DIR/plugins/alias-tips"
-# else
-#     log "alias-tips is already installed."
-# fi
-
-# # Install zsh-autosuggestions
-# if [ ! -d "$ZSH_DIR/plugins/zsh-autosuggestions" ]; then
-#     echo "Installing zsh-autosuggestions..."
-#     git clone --depth 1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_DIR/plugins/zsh-autosuggestions"
-# else
-#     log "zsh-autosuggestions is already installed."
-# fi
-
-# # Install zsh-syntax-highlighting
-# if [ ! -d "$ZSH_DIR/plugins/zsh-syntax-highlighting" ]; then
-#     echo "Installing zsh-syntax-highlighting..."
-#     git clone --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_DIR/plugins/zsh-syntax-highlighting"
-# else
-#     log "zsh-syntax-highlighting is already installed."
-# fi
+_zplugin_load zsh-users zsh-autosuggestions
+_zplugin_load zsh-users zsh-syntax-highlighting
 
 
 log "Zsh plugins installation completed. Make sure to add them to your plugins list in ~/.zshrc if not already done."

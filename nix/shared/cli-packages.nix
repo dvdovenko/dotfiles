@@ -9,6 +9,7 @@ with pkgs; [
   # core dev tooling
   git
   gh
+  curl
   delta
   gnupg
 
