@@ -12,13 +12,12 @@ tracked config files themselves; the `nix/` flake is what symlinks them into
 ```
 .
 ├── .zshenv                 -> ~/.zshenv (sets ZDOTDIR, read before anything else)
-├── .vimrc                  -> ~/.vimrc
 ├── .gitconfig              -> ~/.gitconfig
 ├── .config/
 │   ├── zsh/                -> ~/.config/zsh/ (ZDOTDIR: .zshenv, .zshrc, plugins, aliases, ...)
 │   ├── nvim/                -> ~/.config/nvim/ (NvChad)
 │   ├── tmux/tmux.conf       -> ~/.config/tmux/tmux.conf
-│   ├── vim/.vimrc           -> ~/.config/vim/.vimrc
+│   ├── vim/.vimrc           -> ~/.vimrc (vim itself only reads ~/.vimrc, not XDG paths)
 │   └── starship.toml        -> ~/.config/starship.toml
 ├── scripts/         -> ~/scripts/ (helper scripts, not symlinked)
 └── nix/                     -> nix-darwin + home-manager flake (packages, macOS
@@ -61,11 +60,3 @@ nix run home-manager -- switch --flake ~/dotfiles/nix#vps@x86_64-linux --impure
 `make darwin-bootstrap|darwin-switch|vps-switch|vps-build|bootstrap` wrap
 these from the repo root. Full details, prerequisites, and what each file in
 `nix/` does are in [`nix/README.md`](nix/README.md).
-
-## Extra setup
-
-`scripts/fonts.sh` installs Nerd Fonts (used by Starship/tmux):
-
-```bash
-./scripts/fonts.sh
-```

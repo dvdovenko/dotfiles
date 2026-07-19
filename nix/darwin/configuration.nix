@@ -20,7 +20,9 @@
   users.users.${username}.home = "/Users/${username}";
 
   # Lets macOS's /etc/zshenv pick up the nix-installed environment.
-  # ~/.zshrc itself is still symlinked from ~/dotfiles by home-manager.
+  # ~/.zshenv is symlinked directly by home-manager (nix/home/dotfiles.nix)
+  # and exports ZDOTDIR=~/.config/zsh; ~/.zshrc itself is only reached
+  # indirectly, via the whole-directory xdg.configFile "zsh" symlink.
   programs.zsh.enable = true;
 
   system.stateVersion = 6;

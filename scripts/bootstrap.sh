@@ -21,7 +21,12 @@ set -euo pipefail
 # "USER") both expect $USER — a real login shell always has it, but a bare
 # `docker exec`/cron/some Ansible become setups only guarantee $HOME.
 export USER="${USER:-$(id -un)}"
-export HOME="${HOME:-$(eval echo "~$USER")}"
+if [ -z "${HOME:-}" ]; then
+  HOME="$(getent passwd "$USER" 2>/dev/null | cut -d: -f6)"
+  [ -z "$HOME" ] && [ "$(uname -s)" = "Darwin" ] && HOME="/Users/$USER"
+  [ -z "$HOME" ] && HOME="/home/$USER"
+  export HOME
+fi
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/dvdovenko/dotfiles.git}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"

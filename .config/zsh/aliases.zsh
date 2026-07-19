@@ -67,7 +67,7 @@ alias gensalt8="xxd -g 2 -l 8 -p /dev/random | tr -d '\n'"
 codex-tmux-experimental() {
   # use current folder name for a readable session label
   local session="codex-${PWD##*/}"
-  OPENAI_BASE_URL=http://localhost:8787 tmux new-session -A -s "$session" -c "$PWD" "codex"
+  OPENAI_BASE_URL=http://localhost:8787/v1 tmux new-session -A -s "$session" -c "$PWD" "codex"
 }
 
 
@@ -101,11 +101,13 @@ alias vibecode-claude-stable="claude-tmux"
 alias vibecode-codex="codex-tmux-experimental"
 alias vibecode-codex-stable="codex-tmux"
 
-DOPPLER_PROJECT=$(doppler configure get project --plain)
+if command -v doppler >/dev/null 2>&1; then
+  export DOPPLER_PROJECT=$(doppler configure get project --plain)
 
-if [ -n "$DOPPLER_PROJECT" ]; then
-  DOPPLER_TOKEN=$(doppler configure get token --plain)
-  DOPPLER_CONFIG=$(doppler configure get config --plain)
+  if [ -n "$DOPPLER_PROJECT" ]; then
+    export DOPPLER_TOKEN=$(doppler configure get token --plain)
+    export DOPPLER_CONFIG=$(doppler configure get config --plain)
+  fi
 fi
 
 alias k="kubectl"

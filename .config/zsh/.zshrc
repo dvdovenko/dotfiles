@@ -48,7 +48,7 @@ clear-keep-buffer() {
   zle clear-screen
 }
 zle -N clear-keep-buffer
-bindkey '^' clear-keep-buffer
+bindkey '^L' clear-keep-buffer
 
 # Initialize completion with cached metadata file
 compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
@@ -75,7 +75,10 @@ export TERM="xterm-256color"
 export LANGUAGE="${LANGUAGE:-en_US.UTF-8}"
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
-export LANG="${LANG:-en_US.UTF-8}"
+# C.UTF-8 instead of en_US.UTF-8: guaranteed to exist without a locale-gen
+# step, which matters on the minimal Linux/devcontainer targets this repo
+# also bootstraps.
+export LANG="${LANG:-C.UTF-8}"
 export LC_ALL="$LANG"
 export LC_CTYPE="$LANG"
 export LC_MESSAGES="$LANG"
@@ -109,10 +112,6 @@ plugins=(
   z
   git
   ansible
-  alias-tips
-  fzf-zsh-plugin
-  zsh-autosuggestions
-  zsh-syntax-highlighting
 )
 
 source $ZSH/oh-my-zsh.sh

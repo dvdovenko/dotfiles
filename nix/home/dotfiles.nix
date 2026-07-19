@@ -15,7 +15,7 @@ in
   # exactly as before — their content is not managed by Nix.
   home.file = {
     ".zshenv".source = mkOutOfStoreSymlink "${dotfiles}/.zshenv";
-    ".vimrc".source = mkOutOfStoreSymlink "${dotfiles}/.vimrc";
+    ".vimrc".source = mkOutOfStoreSymlink "${dotfiles}/.config/vim/.vimrc";
     ".gitconfig".source = mkOutOfStoreSymlink "${dotfiles}/.gitconfig";
   };
 
@@ -27,7 +27,6 @@ in
     "zsh".source = mkOutOfStoreSymlink "${dotfiles}/.config/zsh";
     "nvim".source = mkOutOfStoreSymlink "${dotfiles}/.config/nvim";
     "tmux".source = mkOutOfStoreSymlink "${dotfiles}/.config/tmux";
-    "vim".source = mkOutOfStoreSymlink "${dotfiles}/.config/vim";
     "git".source = mkOutOfStoreSymlink "${dotfiles}/.config/git";
     "starship.toml".source = mkOutOfStoreSymlink "${dotfiles}/.config/starship.toml";
   };

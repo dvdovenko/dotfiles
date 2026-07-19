@@ -18,13 +18,12 @@ if [[ ! -f "$HOME/.oh-my-zsh/oh-my-zsh.sh" ]]; then
     "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-ZSH_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-
 # =========================================================
 # Plugins
 # =========================================================
 
 ZPLUGINDIR="${ZDOTDIR:-$HOME/.config/zsh}/plugins"
+LOADED_PLUGINS=false
 
 _zplugin_load() {
   local plugin_path="${ZPLUGINDIR}/${2}"
@@ -35,6 +34,8 @@ _zplugin_load() {
       || { echo "ERROR: failed to install ${2}" >&2; return 1; }
   fi
   source "${plugin_path}/${2}.plugin.zsh"
+
+  LOADED_PLUGINS=true
 }
 
 zplugin-update() {
@@ -51,5 +52,6 @@ _zplugin_load djui alias-tips
 _zplugin_load zsh-users zsh-autosuggestions
 _zplugin_load zsh-users zsh-syntax-highlighting
 
-
-log "Zsh plugins installation completed. Make sure to add them to your plugins list in ~/.zshrc if not already done."
+if [[ $LOADED_PLUGINS = true ]]; then
+  log "Zsh plugins installation completed. Make sure to add them to your plugins list in ~/.zshrc if not already done."
+fi

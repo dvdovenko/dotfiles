@@ -1,4 +1,4 @@
-.PHONY: bootstrap darwin-bootstrap darwin-switch darwin-build vps-switch vps-build fonts
+.PHONY: bootstrap darwin-bootstrap darwin-switch darwin-build vps-switch vps-build
 
 # OS/arch-detecting bootstrap: installs Nix if missing, clones this repo if
 # missing, and runs the right first-time switch for the current machine.
@@ -39,6 +39,3 @@ vps-switch:
 vps-build:
 	nix build --extra-experimental-features "nix-command flakes" --impure \
 		./nix#homeConfigurations."vps@$(VPS_ARCH)-linux".activationPackage --no-link
-
-fonts:
-	./scripts/fonts.sh
