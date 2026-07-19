@@ -71,13 +71,14 @@ ZSH_THEME="bira"
 
 export TERM="xterm-256color"
 
-export LANGUAGE="en_US.UTF-8"
+# could be also en_US:en / en_US.UTF-8
+export LANGUAGE="${LANGUAGE:-en_US.UTF-8}"
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
-export LANG="en_US.UTF-8"
-export LC_ALL="en_US.UTF-8"
-export LC_CTYPE="en_US.UTF-8"
-export LC_MESSAGES="en_US.UTF-8"
+export LANG="${LANG:-en_US.UTF-8}"
+export LC_ALL="$LANG"
+export LC_CTYPE="$LANG"
+export LC_MESSAGES="$LANG"
 
 export HOMEBREW_NO_ENV_HINTS=1
 
