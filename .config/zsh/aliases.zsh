@@ -70,6 +70,9 @@ codex-tmux-experimental() {
   OPENAI_BASE_URL=http://localhost:8787/v1 tmux new-session -A -s "$session" -c "$PWD" "codex"
 }
 
+codex-experimental() {
+  OPENAI_BASE_URL=http://localhost:8787/v1 codex
+}
 
 codex-tmux() {
   # use current folder name for a readable session label
@@ -95,11 +98,12 @@ claude-tmux() {
   tmux new-session -A -s "$session" -c "$PWD" "claude"
 }
 
-alias vibecode="claude-tmux-experimental"
+alias vibecode="codex-tmux-experimental"
 alias vibecode-claude="claude-tmux-experimental"
 alias vibecode-claude-stable="claude-tmux"
 alias vibecode-codex="codex-tmux-experimental"
 alias vibecode-codex-stable="codex-tmux"
+alias codex-experimental="codex-experimental"
 
 if command -v doppler >/dev/null 2>&1; then
   export DOPPLER_PROJECT=$(doppler configure get project --plain)
@@ -111,5 +115,7 @@ if command -v doppler >/dev/null 2>&1; then
 fi
 
 alias k="kubectl"
+alias a="ansible"
+alias ap="ansible-playbook"
 # alias docker="podman"
 # export DOPPLER_TOKEN="$(pass show doppler/token)"

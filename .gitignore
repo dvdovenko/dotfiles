@@ -18,3 +18,4 @@ TUTORIAL.md
 .config/tmux/plugins/
 .config/zsh/plugins/
 .config/zsh/history
+.gstack/

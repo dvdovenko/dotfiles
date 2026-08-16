@@ -13,6 +13,25 @@ return {
     end,
   },
 
+  -- auto-installs LSP servers via Mason so a fresh clone of these dotfiles
+  -- doesn't hit "language server not installed" on first open
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    event = "VeryLazy",
+    opts = {
+      ensure_installed = {
+        "lua-language-server",
+        "typescript-language-server",
+        "json-lsp",
+        "yaml-language-server",
+        "rust-analyzer",
+        "gopls",
+        "dockerfile-language-server",
+      },
+    },
+  },
+
   {
     "nvim-treesitter/nvim-treesitter",
     opts = {

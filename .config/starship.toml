@@ -2,7 +2,7 @@
 
 add_newline = true
 
-format = "$directory$os$git_branch$git_status$nodejs$rust$golang$php $character"
+format = "$directory$os$git_branch$git_status$nodejs$python$rust$golang$php $character"
 
 [os]
 disabled = false
@@ -38,6 +38,10 @@ conflicted = "[⚡$count ](bold red)"
 [nodejs]
 symbol = ""
 format = "[$symbol $version](green) "
+
+[python]
+symbol = ""
+format = '[$symbol $version (\($virtualenv\))](yellow) '
 
 [rust]
 symbol = ""

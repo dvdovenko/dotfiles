@@ -9,9 +9,14 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Nix-module Neovim config, run side by side with the NvChad setup as a
+    # second binary (`nvimf`) - see nix/home/nvf.nix.
+    nvf.url = "github:notashelf/nvf";
+    nvf.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, ... }:
+  outputs = { self, nixpkgs, nix-darwin, home-manager, nvf, ... }@inputs:
   let
     hostname = "danylo-mbp";
     username = "danylo";
@@ -46,7 +51,7 @@
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = { inherit username; };
+          home-manager.extraSpecialArgs = { inherit username inputs; };
           home-manager.users.${username} = import ./home/home.nix;
         }
       ];

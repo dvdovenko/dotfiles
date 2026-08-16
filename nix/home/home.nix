@@ -1,7 +1,7 @@
-{ config, pkgs, username, ... }:
+{ config, pkgs, username, inputs, ... }:
 
 {
-  imports = [ ./dotfiles.nix ];
+  imports = [ ./dotfiles.nix ./nvf.nix ];
 
   home.username = username;
   home.homeDirectory = "/Users/${username}";
