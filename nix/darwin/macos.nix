@@ -10,5 +10,6 @@
     finder.AppleShowAllExtensions = true;
   };
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  # This machine already has Touch ID enabled in its protected sudo_local.
+  security.pam.services.sudo_local.enable = false;
 }

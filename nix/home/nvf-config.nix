@@ -1,4 +1,4 @@
-# Nix-native mirror of ../../.config/nvim (NvChad + lazy.nvim). Kept as a
+# Nix-native mirror of ../../home/dot_config/nvim (NvChad + lazy.nvim). Kept as a
 # separate `nvimf` binary (see nvf.nix) rather than replacing NvChad - see
 # nix/README.md for why. Maps the same options/theme/keymaps/LSP servers;
 # not a byte-for-byte port (harpoon and vim-tmux-navigator have no nvf

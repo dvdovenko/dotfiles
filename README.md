@@ -1,62 +1,51 @@
 # dotfiles
 
-Personal configuration files. Installed and kept in sync via a
-[nix-darwin](https://github.com/nix-darwin/nix-darwin) + [home-manager](https://github.com/nix-community/home-manager)
-flake — see [`nix/README.md`](nix/README.md) for the actual install/update
-commands, on macOS or on a Linux/VPS box. This root repo just holds the
-tracked config files themselves; the `nix/` flake is what symlinks them into
-`$HOME` and installs the packages they need.
+Nix installs packages and applies system settings. [chezmoi](https://www.chezmoi.io/)
+installs the files in `home/` into `$HOME`. The same repository supports the
+`danylo-mbp` macOS flake and standalone Home Manager on Linux.
 
 ## Layout
 
-```
-.
-├── .zshenv                 -> ~/.zshenv (sets ZDOTDIR, read before anything else)
-├── .gitconfig              -> ~/.gitconfig
-├── .config/
-│   ├── zsh/                -> ~/.config/zsh/ (ZDOTDIR: .zshenv, .zshrc, plugins, aliases, ...)
-│   ├── nvim/                -> ~/.config/nvim/ (NvChad)
-│   ├── tmux/tmux.conf       -> ~/.config/tmux/tmux.conf
-│   ├── vim/.vimrc           -> ~/.vimrc (vim itself only reads ~/.vimrc, not XDG paths)
-│   └── starship.toml        -> ~/.config/starship.toml
-├── scripts/         -> ~/scripts/ (helper scripts, not symlinked)
-└── nix/                     -> nix-darwin + home-manager flake (packages, macOS
-                                defaults, Homebrew, and the symlinks above)
-```
+- `nix/`: nix-darwin, Home Manager, and shared CLI packages, including chezmoi.
+- `home/`: chezmoi source for zsh, tmux, Starship, Git, Vim, and Neovim.
+- `scripts/bootstrap.sh`: installs Nix if needed, activates the appropriate
+  flake target, and applies chezmoi.
 
-zsh reads `~/.zshenv` before it knows about `$ZDOTDIR`, so that one file has to live
-at the repo root; everything else zsh-related lives under `.config/zsh` and is found
-automatically once `ZDOTDIR` is exported.
+chezmoi copies tracked config files into `$HOME`. oh-my-zsh, the zsh plugin
+loader, TPM, and Neovim continue to install their own plugins. Local Git
+identities in `~/.config/git/conf.d/*.gitconfig`, plugin clones, histories, and
+caches stay outside chezmoi's source state.
 
-The first `zsh`/`tmux`/`nvim` launch after installing self-installs oh-my-zsh, its
-zsh plugins, and NvChad's plugins respectively — that part isn't managed by Nix,
-see [`nix/README.md`](nix/README.md) for why.
+## Install
 
-## Install / update
+On a fresh macOS or Linux machine:
 
-One-liner, any OS, installs Nix itself if it's missing (VPS, devcontainer,
-OrbStack VM, ...):
-
-```bash
+```sh
 curl -fsSL https://raw.githubusercontent.com/dvdovenko/dotfiles/main/scripts/bootstrap.sh | bash
 ```
 
-Or manually — macOS:
+With an existing checkout:
 
-```bash
-git clone git@github.com:dvdovenko/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-nix run nix-darwin -- switch --flake ~/dotfiles/nix   # first time only
-darwin-rebuild switch --flake ~/dotfiles/nix           # every update after
+```sh
+./scripts/bootstrap.sh
 ```
 
-Any Linux box / VPS with Nix installed (no NixOS or root required, any user):
+The default checkout is `~/dotfiles`. `DOTFILES_DIR` and `DOTFILES_REPO` can
+override it. The macOS Nix target is specific to `danylo-mbp`; the Linux target
+uses the current user and detects x86_64 or aarch64.
 
-```bash
-git clone git@github.com:dvdovenko/dotfiles.git ~/dotfiles
-nix run home-manager -- switch --flake ~/dotfiles/nix#vps@x86_64-linux --impure
-```
+## Update
 
-`make darwin-bootstrap|darwin-switch|vps-switch|vps-build|bootstrap` wrap
-these from the repo root. Full details, prerequisites, and what each file in
-`nix/` does are in [`nix/README.md`](nix/README.md).
+After pulling the repository, run `make darwin-switch` on this Mac or
+`make vps-switch` on Linux. Both commands switch Nix first, then apply chezmoi.
+For config-only changes, use `make dotfiles-apply`. Preview with `chezmoi diff`
+and check pending changes with `chezmoi status`.
+
+On the first migration from Stow or Home Manager symlinks,
+`scripts/apply-dotfiles.sh` saves the previous links and their contents under
+`~/.local/state/dotfiles-migration.*` before replacing them. It keeps local
+plugin clones and Git identities in the new real directories. Existing regular
+files are left for chezmoi to compare; conflicts require a decision.
+
+See [nix/README.md](nix/README.md) for Nix prerequisites, build-only commands,
+and devcontainer details.

@@ -25,6 +25,7 @@ with pkgs; [
   just
   ncdu
   tig
+  lazygit
   trash-cli
   watchman
   htop
@@ -33,6 +34,7 @@ with pkgs; [
   tmux
   neovim
   starship
+  chezmoi
 
   # build essentials
   coreutils

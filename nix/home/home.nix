@@ -1,7 +1,7 @@
 { config, pkgs, username, inputs, ... }:
 
 {
-  imports = [ ./dotfiles.nix ./nvf.nix ];
+  imports = [ ./nvf.nix ];
 
   home.username = username;
   home.homeDirectory = "/Users/${username}";
@@ -9,7 +9,5 @@
 
   programs.home-manager.enable = true;
 
-  # No programs.zsh / programs.git / programs.neovim / programs.tmux here —
-  # their config files are symlinked directly via dotfiles.nix instead, and
-  # home-manager would refuse to manage the same target path twice.
+  # chezmoi deploys dotfiles after the Nix switch.
 }

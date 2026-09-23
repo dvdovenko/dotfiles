@@ -1,13 +1,11 @@
 { config, pkgs, username, homeDirectory, ... }:
 
 {
-  imports = [ ./dotfiles.nix ];
-
   home.username = username;
   home.homeDirectory = homeDirectory;
   home.stateVersion = "24.11";
 
-  home.packages = import ../shared/cli-packages.nix { inherit pkgs; };
+  home.packages = (import ../shared/cli-packages.nix { inherit pkgs; }) ++ [ pkgs.zsh ];
 
   programs.home-manager.enable = true;
 

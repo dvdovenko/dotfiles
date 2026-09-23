@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 #
 # Bootstrap Nix + this dotfiles repo on a fresh box: installs Nix if it's
-# missing, clones (or updates) the repo, then activates the right flake
-# target for the current OS/arch. Idempotent — safe to re-run to pick up
-# updates.
+# missing, clones (or updates) the repo, activates the right flake target,
+# then applies the dotfiles with chezmoi. Idempotent on re-run.
 #
 # Remote, nothing cloned yet (VPS, devcontainer, OrbStack VM, ...):
 #   curl -fsSL https://raw.githubusercontent.com/dvdovenko/dotfiles/main/scripts/bootstrap.sh | bash
@@ -12,8 +11,7 @@
 #   ./scripts/bootstrap.sh
 #   make bootstrap
 #
-# Env overrides: DOTFILES_DIR (default ~/dotfiles — must stay ~/dotfiles,
-# see the check below), DOTFILES_REPO.
+# Env overrides: DOTFILES_DIR (default ~/dotfiles), DOTFILES_REPO.
 
 set -euo pipefail
 
@@ -30,16 +28,6 @@ fi
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/dvdovenko/dotfiles.git}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
-
-# home/dotfiles.nix derives the symlink source from home.homeDirectory +
-# "/dotfiles", not from this script's DOTFILES_DIR — so an override that
-# doesn't land at exactly $HOME/dotfiles produces dangling symlinks after
-# activation succeeds (it won't error, so this is easy to miss).
-if [ "$DOTFILES_DIR" != "$HOME/dotfiles" ]; then
-  echo "==> WARNING: DOTFILES_DIR=$DOTFILES_DIR but the flake symlinks always" >&2
-  echo "    target \$HOME/dotfiles ($HOME/dotfiles). Activation will 'succeed'" >&2
-  echo "    but the symlinks it creates will dangle unless these match." >&2
-fi
 
 os="$(uname -s)"
 arch="$(uname -m)"
@@ -111,11 +99,14 @@ if [ "$os" = "Darwin" ]; then
   # darwin/configuration.nix is tied to one specific machine (hostname +
   # username baked into flake.nix) — this only really applies on that Mac.
   echo "==> Activating nix-darwin config"
-  nix run nix-darwin -- switch --flake ./nix
+  sudo -H "$(command -v nix)" run --inputs-from "path:$DOTFILES_DIR/nix" \
+    nix-darwin -- switch --flake "path:$DOTFILES_DIR/nix#danylo-mbp"
 else
   echo "==> Activating home-manager config (vps@${vps_arch}-linux)"
   nix run --extra-experimental-features "nix-command flakes" \
     home-manager -- switch --flake "./nix#vps@${vps_arch}-linux" --impure
 fi
+
+"$DOTFILES_DIR/scripts/apply-dotfiles.sh"
 
 echo "==> Done."

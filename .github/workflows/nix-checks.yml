@@ -4,12 +4,33 @@ on:
   push:
     paths:
       - "nix/**"
+      - "home/**"
+      - ".chezmoiroot"
+      - "scripts/**"
       - ".github/workflows/nix-checks.yml"
   pull_request:
     paths:
       - "nix/**"
+      - "home/**"
+      - ".chezmoiroot"
+      - "scripts/**"
+      - ".github/workflows/nix-checks.yml"
 
 jobs:
+  chezmoi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - run: |
+          target="$(mktemp -d)"
+          nix shell --inputs-from ./nix nixpkgs#chezmoi -c chezmoi --source "$PWD" --destination "$target" apply
+          test -f "$target/.zshenv"
+          test -f "$target/.config/zsh/.zshrc"
+          test -f "$target/.config/tmux/tmux.conf"
+          test -f "$target/.config/starship.toml"
+          test -f "$target/.vimrc"
+
   # Native build on a Linux runner: the one target that can actually be
   # built (not just evaluated) without a remote/linux builder.
   vps-x86_64-linux:

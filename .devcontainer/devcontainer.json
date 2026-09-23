@@ -7,11 +7,8 @@
   // same way a fresh VPS would.
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
   "remoteUser": "vscode",
-  // home/dotfiles.nix derives the symlink source from home.homeDirectory +
-  // "/dotfiles" — NOT from bootstrap.sh's DOTFILES_DIR — so the repo has to
-  // actually live at $HOME/dotfiles or the symlinks home-manager creates
-  // dangle. Override the devcontainer tool's default /workspaces/<name>
-  // mount point rather than fighting that with DOTFILES_DIR.
+  // Keep the checkout at ~/dotfiles, the same default used by bootstrap and
+  // the tmux sessionizer.
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/dotfiles,type=bind,consistency=cached",
   "workspaceFolder": "/home/vscode/dotfiles",
   "postCreateCommand": "bash scripts/bootstrap.sh"

@@ -1,6 +1,6 @@
 # Second Neovim, configured declaratively via nvf (github:notashelf/nvf)
-# instead of the NvChad + lazy.nvim setup ../../.config/nvim symlinks in via
-# dotfiles.nix. Installed as `nvimf`, not `nvim` - nvf's wrapper binary is
+# instead of the NvChad + lazy.nvim setup deployed from home/ by chezmoi.
+# Installed as `nvimf`, not `nvim` - nvf's wrapper binary is
 # also literally called `nvim`, so it's renamed here to run side by side
 # with NvChad's `nvim` (from shared/cli-packages.nix) instead of colliding
 # with it. Switching between them is just typing the other command; there's
