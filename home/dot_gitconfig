@@ -1,6 +1,6 @@
 [core]
 	pager = delta
-  editor = vim
+  editor = nvim
 	sshCommand = ssh -i ~/.ssh/id_rsa
 
 [interactive]

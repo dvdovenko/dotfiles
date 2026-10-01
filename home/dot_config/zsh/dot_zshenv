@@ -33,7 +33,7 @@ export STARSHIP_CONFIG="$XDG_CONFIG_HOME/starship.toml"
 
 # ---------- PATH ----------
 # Personal binaries/scripts
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.go/bin"
 export ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
 
 # Prevent Python virtualenv from polluting the prompt

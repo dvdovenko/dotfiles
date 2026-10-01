@@ -32,7 +32,6 @@ setopt NUMERIC_GLOB_SORT  # sort file10 after file9, not after file1
 # =========================================================
 
 # Load completion system
-autoload -Uz compinit
 
 autoload -Uz zmv
 
@@ -51,7 +50,7 @@ zle -N clear-keep-buffer
 bindkey '^L' clear-keep-buffer
 
 # Initialize completion with cached metadata file
-compinit -d "$XDG_CACHE_HOME/zsh/zcompdump"
+export ZSH_COMPDUMP="$XDG_CACHE_HOME/zsh/zcompdump"
 
 # Enable interactive completion menu selection
 zstyle ':completion:*' menu select
@@ -67,7 +66,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="bira"
+ZSH_THEME=""
 
 export TERM="xterm-256color"
 
@@ -101,7 +100,6 @@ HIST_STAMPS="dd.mm.yyyy"
 
 ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
 
-[[ -f $ZDOTDIR/plugins.zsh ]] && source $ZDOTDIR/plugins.zsh
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
@@ -109,28 +107,21 @@ ZDOTDIR="${ZDOTDIR:-$HOME/.config/zsh}"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  z
   git
   ansible
 )
 
-source $ZSH/oh-my-zsh.sh
+[[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
 
 # =========================================================
 # Modular Config Files
+
 # =========================================================
 
 [[ -f $ZDOTDIR/aliases.zsh ]] && source $ZDOTDIR/aliases.zsh
-[[ -f $ZDOTDIR/fnm.zsh ]] && source $ZDOTDIR/fnm.zsh
 [[ -f $ZDOTDIR/functions.zsh ]] && source $ZDOTDIR/functions.zsh
 [[ -f $ZDOTDIR/fzf.zsh ]] && source $ZDOTDIR/fzf.zsh
-[[ -f $ZDOTDIR/nvim.zsh ]] && source $ZDOTDIR/nvim.zsh
 [[ -f $ZDOTDIR/starship.zsh ]] && source $ZDOTDIR/starship.zsh
 [[ -f $ZDOTDIR/zoxide.zsh ]] && source $ZDOTDIR/zoxide.zsh
 
-# User configuration
-
-PATH="$HOME/.go/bin:$PATH"
-if [[ -f "/opt/homebrew/bin/brew" ]] then
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
+[[ -f $ZDOTDIR/plugins.zsh ]] && source $ZDOTDIR/plugins.zsh

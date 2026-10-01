@@ -3,11 +3,21 @@
 # any standalone Linux/VPS home-manager config (home/home-linux.nix, as
 # home.packages). Keep this list to things that build the same way
 # everywhere — OS-specific or tap-only tools stay in darwin/homebrew.nix.
-{ pkgs }:
+{ pkgs, profile ? "core" }:
 
 with pkgs; [
   # core dev tooling
   git
+  git-lfs
+  openssh
+  rsync
+  unzip
+  less
+  file
+  rtk
+  devbox
+  codex
+  claude-code
   gh
   curl
   delta
@@ -26,8 +36,6 @@ with pkgs; [
   ncdu
   tig
   lazygit
-  trash-cli
-  watchman
   htop
 
   # editors / multiplexer / prompt
@@ -39,21 +47,22 @@ with pkgs; [
   # build essentials
   coreutils
   gnumake
+
+  # misc
+  pass
+  uv
+  sshpass
+  mkcert
+] ++ lib.optionals (profile == "full") [
+  trash-cli
+  watchman
   automake
   libtool
   pkg-config
-
-  # languages / toolchains
   go
   fnm
   nodejs
   rustup
   python311
-
-  # misc
-  pass
-  uv
   pipx
-  sshpass
-  mkcert
 ]

@@ -1,11 +1,11 @@
-{ config, pkgs, username, homeDirectory, ... }:
+{ config, pkgs, username, homeDirectory, profile, ... }:
 
 {
   home.username = username;
   home.homeDirectory = homeDirectory;
   home.stateVersion = "24.11";
 
-  home.packages = (import ../shared/cli-packages.nix { inherit pkgs; }) ++ [ pkgs.zsh ];
+  home.packages = (import ../shared/cli-packages.nix { inherit pkgs profile; }) ++ [ pkgs.zsh ];
 
   programs.home-manager.enable = true;
 
@@ -13,4 +13,7 @@
   # VPS with just Nix installed) needs this so things like fontconfig and
   # XDG paths resolve the way packages expect on a "real" NixOS.
   targets.genericLinux.enable = true;
+  targets.genericLinux.gpu.enable = false;
+  xdg.mime.enable = false;
+  xdg.mimeApps.enable = false;
 }

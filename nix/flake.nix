@@ -9,14 +9,9 @@
 
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
-
-    # Nix-module Neovim config, run side by side with the NvChad setup as a
-    # second binary (`nvimf`) - see nix/home/nvf.nix.
-    nvf.url = "github:notashelf/nvf";
-    nvf.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, nix-darwin, home-manager, nvf, ... }@inputs:
+  outputs = { nixpkgs, nix-darwin, home-manager, ... }:
   let
     hostname = "danylo-mbp";
     username = "danylo";
@@ -29,37 +24,45 @@
     # Username/home dir come from $USER/$HOME at build time (needs --impure)
     # instead of being hardcoded, so the same "vps@<system>" target works
     # for whichever user Ansible runs home-manager as.
-    mkVpsHome = linuxSystem: home-manager.lib.homeManagerConfiguration {
+    mkVpsHome = profile: linuxSystem: home-manager.lib.homeManagerConfiguration {
       pkgs = import nixpkgs {
         system = linuxSystem;
         config.allowUnfree = true;
       };
       extraSpecialArgs = {
+        inherit profile;
         username = builtins.getEnv "USER";
         homeDirectory = builtins.getEnv "HOME";
       };
       modules = [ ./home/home-linux.nix ];
     };
-  in
-  {
-    darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
+    mkDarwin = profile: nix-darwin.lib.darwinSystem {
       inherit system;
-      specialArgs = { inherit username; };
+      specialArgs = { inherit username profile; };
       modules = [
         ./darwin/configuration.nix
         home-manager.darwinModules.home-manager
         {
           home-manager.useGlobalPkgs = true;
           home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = { inherit username inputs; };
+          home-manager.extraSpecialArgs = { inherit username; };
           home-manager.users.${username} = import ./home/home.nix;
         }
       ];
     };
 
+  in
+  {
+    darwinConfigurations = {
+      ${hostname} = mkDarwin "core";
+      "${hostname}-full" = mkDarwin "full";
+    };
+
     homeConfigurations = {
-      "vps@x86_64-linux" = mkVpsHome "x86_64-linux";
-      "vps@aarch64-linux" = mkVpsHome "aarch64-linux";
+      "vps@x86_64-linux" = mkVpsHome "core" "x86_64-linux";
+      "vps@aarch64-linux" = mkVpsHome "core" "aarch64-linux";
+      "vps-full@x86_64-linux" = mkVpsHome "full" "x86_64-linux";
+      "vps-full@aarch64-linux" = mkVpsHome "full" "aarch64-linux";
     };
   };
 }

@@ -11,7 +11,8 @@
 #   ./scripts/bootstrap.sh
 #   make bootstrap
 #
-# Env overrides: DOTFILES_DIR (default ~/dotfiles), DOTFILES_REPO.
+# Env overrides: DOTFILES_DIR (default ~/dotfiles), DOTFILES_REPO,
+# DOTFILES_PROFILE (core, or full for standalone language toolchains).
 
 set -euo pipefail
 
@@ -28,6 +29,13 @@ fi
 
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/dvdovenko/dotfiles.git}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+
+DOTFILES_PROFILE="${DOTFILES_PROFILE:-core}"
+case "$DOTFILES_PROFILE" in
+  core) profile_suffix="" ;;
+  full) profile_suffix="-full" ;;
+  *) echo "bootstrap: DOTFILES_PROFILE must be core or full" >&2; exit 1 ;;
+esac
 
 os="$(uname -s)"
 arch="$(uname -m)"
@@ -50,6 +58,15 @@ if [ "$os" = "Linux" ] && [ ! -d /run/systemd/system ]; then
   no_systemd=true
 fi
 
+source_nix() {
+  local profile
+  for profile in /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh "$HOME/.nix-profile/etc/profile.d/nix.sh"; do
+    # shellcheck disable=SC1090
+    [[ ! -e "$profile" ]] || . "$profile"
+  done
+}
+source_nix
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "==> Nix not found, installing (Determinate Systems installer)"
   plan_args=()
@@ -63,20 +80,12 @@ else
   echo "==> Nix already installed ($(nix --version))"
 fi
 
-# Pick up the daemon profile in this non-login shell so `nix` is on PATH
-# for the rest of this script without needing a fresh shell.
-for profile in \
-  '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
-  "$HOME/.nix-profile/etc/profile.d/nix.sh"
-do
-  # shellcheck disable=SC1090
-  [ -e "$profile" ] && . "$profile"
-done
+source_nix
 
 # --init none means nothing starts nix-daemon for us (no systemd, no
 # launchd) — start it by hand if it isn't already up. Real VPS installs
 # use the default plan instead, where systemd owns this.
-if [ "$no_systemd" = true ] && [ ! -S /nix/var/nix/daemon-socket/socket ]; then
+if [ "$no_systemd" = true ] && ! nix --extra-experimental-features "nix-command flakes" store ping >/dev/null 2>&1; then
   echo "==> Starting nix-daemon manually (no systemd to supervise it)"
   # Absolute path, not just `nix-daemon`: sudo resets $PATH (secure_path),
   # which doesn't include the Nix profile's bin dir.
@@ -100,13 +109,15 @@ if [ "$os" = "Darwin" ]; then
   # username baked into flake.nix) — this only really applies on that Mac.
   echo "==> Activating nix-darwin config"
   sudo -H "$(command -v nix)" run --inputs-from "path:$DOTFILES_DIR/nix" \
-    nix-darwin -- switch --flake "path:$DOTFILES_DIR/nix#danylo-mbp"
+    nix-darwin -- switch --flake "path:$DOTFILES_DIR/nix#danylo-mbp${profile_suffix}"
 else
-  echo "==> Activating home-manager config (vps@${vps_arch}-linux)"
+  echo "==> Activating home-manager config (vps${profile_suffix}@${vps_arch}-linux)"
   nix run --extra-experimental-features "nix-command flakes" \
-    home-manager -- switch --flake "./nix#vps@${vps_arch}-linux" --impure
+    --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps${profile_suffix}@${vps_arch}-linux" --impure
 fi
 
 "$DOTFILES_DIR/scripts/apply-dotfiles.sh"
+
+"$DOTFILES_DIR/scripts/install-plugins.sh"
 
 echo "==> Done."

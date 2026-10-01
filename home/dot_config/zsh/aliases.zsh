@@ -20,7 +20,7 @@ alias -s yaml="bat -l yaml"
 alias -s json="jq ."
 
 # global aliases
-alias -g C="| pbcopy"
+[[ "$OSTYPE" != darwin* ]] || alias -g C="| pbcopy"
 alias -g L="| less"
 alias -g JQ="| jq ."
 alias -g NE="2>/dev/null"
@@ -49,7 +49,7 @@ fi
 # alias air='$(go env GOPATH)/bin/air'
 # alias swag='$(go env GOPATH)/bin/swag'
 
-alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
+[[ "$OSTYPE" != darwin* ]] || alias flushdns="sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder"
 
 alias npmpublic="npm config set registry https://registry.npmjs.org/ && npm config get registry"
 alias npmlocal="npm set registry http://localhost:4873; npm config get registry"
@@ -105,14 +105,6 @@ alias vibecode-codex="codex-tmux-experimental"
 alias vibecode-codex-stable="codex-tmux"
 alias codex-experimental="codex-experimental"
 
-if command -v doppler >/dev/null 2>&1; then
-  export DOPPLER_PROJECT=$(doppler configure get project --plain)
-
-  if [ -n "$DOPPLER_PROJECT" ]; then
-    export DOPPLER_TOKEN=$(doppler configure get token --plain)
-    export DOPPLER_CONFIG=$(doppler configure get config --plain)
-  fi
-fi
 
 alias k="kubectl"
 alias a="ansible"

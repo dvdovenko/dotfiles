@@ -1,53 +1,5 @@
-#! /bin/zsh
-
-if command -v fzf >/dev/null 2>&1; then
-  # echo "fzf is present..."
-else
-  echo "fzf not found, trying installing..."
-
-  if command -v brew >/dev/null 2>&1; then
-    brew install fzf
-  elif command -v apt-get >/dev/null 2>&1; then
-    sudo apt-get install fzf
-  elif command -v yum >/dev/null 2>&1; then
-    sudo yum install fzf
-  elif command -v apk >/dev/null 2>&1; then
-    sudo apk add fzf
-  elif command -v pacman >/dev/null 2>&1; then
-    sudo pacman -S fzf
-  else
-    echo "Could not find a package manager to install fzf. Please install it manually."
-  fi
-fi
-
-# =========================================================
-# Fuzzy finder
-# =========================================================
-
-# macOS / Homebrew (Apple Silicon)
-if [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
-  source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
-  source /opt/homebrew/opt/fzf/shell/completion.zsh
-fi
-
-# macOS / Homebrew (Intel)
-if [[ -f /usr/local/opt/fzf/shell/key-bindings.zsh ]]; then
-  source /usr/local/opt/fzf/shell/key-bindings.zsh
-  source /usr/local/opt/fzf/shell/completion.zsh
-fi
-
-# Arch
-if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
-  source /usr/share/fzf/key-bindings.zsh
-  source /usr/share/fzf/completion.zsh
-fi
-
-# Ubuntu
-if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
-  source /usr/share/doc/fzf/examples/key-bindings.zsh
-  source /usr/share/doc/fzf/examples/completion.zsh
-fi
-
+(( $+commands[fzf] )) || return
+source <(fzf --zsh)
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --strip-cwd-prefix'  # strip-cwd-prefix removes the leading ./ from results
 
 # Ctrl-T uses fd
