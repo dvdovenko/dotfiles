@@ -8,7 +8,7 @@ installs the files in `home/` into `$HOME`. The same repository supports the
 
 - `nix/`: nix-darwin, Home Manager, and shared CLI packages, including chezmoi.
 - `home/`: chezmoi source for zsh, tmux, Starship, Git, Vim, and Neovim.
-- `scripts/bootstrap.sh`: installs Nix if needed, activates the appropriate
+- `scripts/bootstrap.sh`: installs Nix and Homebrew if needed, activates the appropriate
   flake target, and applies chezmoi.
 
 chezmoi copies tracked config files into `$HOME`. oh-my-zsh, the zsh plugin
@@ -45,6 +45,31 @@ Existing installations and local configuration are retained.
 
 Install editor tools explicitly with `:MasonInstall <tool>` and parsers with
 `:TSInstall <language>`; neither is installed in bulk at startup.
+
+## Homebrew and Linuxbrew
+
+Bootstrap installs [Homebrew](https://docs.brew.sh/Installation) before Nix
+activation. Linuxbrew is Homebrew on Linux, with its standard prefix at
+`/home/linuxbrew/.linuxbrew`; macOS uses `/opt/homebrew` on Apple Silicon or
+`/usr/local` on Intel. Run as a non-root user with sudo access. macOS needs
+Xcode Command Line Tools; Linux needs a compiler/build tools, procps, curl,
+file, and Git (on Ubuntu: `sudo apt-get install build-essential procps curl file git`).
+The installer runs noninteractively, so fresh installations need available sudo
+credentials. Setup reuses an existing `brew`, including one outside `PATH`.
+
+```sh
+make brew-install  # Install Homebrew only
+make brew-bundle   # Install optional packages from this checkout's Brewfile
+make brew-check    # Check Brewfile packages without installing or upgrading
+```
+
+macOS packages remain managed by `nix/darwin/homebrew.nix`, including casks.
+The root `Brewfile` adds optional Linux tools; bootstrap does not install those
+packages automatically. Both Nix profiles keep their existing package lists.
+Bundle installation disables automatic updates and upgrades, and never runs
+cleanup. [Brewfile](https://docs.brew.sh/Brew-Bundle-and-Brewfile) does not pin
+versions. Login zsh initializes an existing Homebrew installation while keeping
+inherited paths, including Nix, first; shell startup never installs packages.
 
 ## Update
 

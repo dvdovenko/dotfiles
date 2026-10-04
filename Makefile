@@ -7,7 +7,7 @@ endif
 endif
 PROFILE_SUFFIX := $(if $(filter full,$(DOTFILES_PROFILE)),-full,)
 
-.PHONY: bootstrap plugins-install check-shell darwin-bootstrap darwin-switch darwin-build vps-switch vps-build dotfiles-apply
+.PHONY: bootstrap plugins-install check-shell check-homebrew brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-build vps-switch vps-build dotfiles-apply
 
 # OS/arch-detecting bootstrap: installs Nix if missing, clones this repo if
 # missing, and runs the right first-time switch for the current machine.
@@ -19,6 +19,7 @@ bootstrap:
 # One-time: installs nix-darwin itself and activates this config. Requires
 # Nix to already be installed (see nix/README.md).
 darwin-bootstrap:
+	bash scripts/setup-homebrew.sh
 	sudo -H $(shell command -v nix) run --inputs-from "path:$(CURDIR)/nix" nix-darwin -- switch --flake "path:$(CURDIR)/nix#danylo-mbp$(PROFILE_SUFFIX)"
 	./scripts/apply-dotfiles.sh
 
@@ -61,3 +62,15 @@ plugins-install:
 
 check-shell:
 	bash scripts/check-shell.sh
+
+check-homebrew:
+	bash scripts/check-homebrew.sh
+
+brew-install:
+	bash scripts/setup-homebrew.sh
+
+brew-bundle:
+	bash scripts/setup-homebrew.sh bundle
+
+brew-check:
+	bash scripts/setup-homebrew.sh check

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 #
 # Bootstrap Nix + this dotfiles repo on a fresh box: installs Nix if it's
-# missing, clones (or updates) the repo, activates the right flake target,
+# missing, clones (or updates) the repo, installs Homebrew if missing,
+# activates the right flake target,
 # then applies the dotfiles with chezmoi. Idempotent on re-run.
 #
 # Remote, nothing cloned yet (VPS, devcontainer, OrbStack VM, ...):
@@ -103,6 +104,8 @@ else
 fi
 
 cd "$DOTFILES_DIR"
+
+bash "$DOTFILES_DIR/scripts/setup-homebrew.sh"
 
 if [ "$os" = "Darwin" ]; then
   # darwin/configuration.nix is tied to one specific machine (hostname +

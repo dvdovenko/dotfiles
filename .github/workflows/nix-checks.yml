@@ -7,6 +7,8 @@ on:
       - "home/**"
       - ".chezmoiroot"
       - "scripts/**"
+      - "Brewfile"
+      - "Makefile"
       - ".github/workflows/nix-checks.yml"
   pull_request:
     paths:
@@ -14,6 +16,8 @@ on:
       - "home/**"
       - ".chezmoiroot"
       - "scripts/**"
+      - "Brewfile"
+      - "Makefile"
       - ".github/workflows/nix-checks.yml"
 
 jobs:
@@ -21,12 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: bash scripts/check-homebrew.sh
       - uses: DeterminateSystems/nix-installer-action@main
       - run: |
           target="$(mktemp -d)"
           nix shell --inputs-from ./nix nixpkgs#chezmoi -c chezmoi --source "$PWD" --destination "$target" apply
           test -f "$target/.zshenv"
           test -f "$target/.config/zsh/.zshrc"
+          test -f "$target/.config/zsh/.zprofile"
           test -f "$target/.config/tmux/tmux.conf"
           test -f "$target/.config/starship.toml"
           test -f "$target/.vimrc"

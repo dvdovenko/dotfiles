@@ -1,0 +1,17 @@
+# Initialize an existing Homebrew installation in login shells.
+# Keep inherited paths (including Nix) ahead of Homebrew tools.
+if [[ "$OSTYPE" == darwin* ]]; then
+  _brew_prefixes=(/opt/homebrew /usr/local)
+else
+  _brew_prefixes=(/home/linuxbrew/.linuxbrew "$HOME/.linuxbrew")
+fi
+for _brew_prefix in "${_brew_prefixes[@]}"; do
+  if [[ -x "$_brew_prefix/bin/brew" ]]; then
+    _brew_inherited_path=("${path[@]}")
+    eval "$("$_brew_prefix/bin/brew" shellenv)"
+    typeset -U path
+    path=("${_brew_inherited_path[@]}" "${path[@]}")
+    break
+  fi
+done
+unset _brew_prefixes _brew_prefix _brew_inherited_path
