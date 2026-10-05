@@ -37,6 +37,12 @@ if [ -z "$brew_bin" ]; then
     echo "homebrew: run setup as a non-root user with sudo access" >&2
     exit 1
   fi
+  # Bootstrap runs before Home Manager makes the core utilities available.
+  if ! command -v curl >/dev/null 2>&1 && command -v nix >/dev/null 2>&1; then
+    exec nix --extra-experimental-features "nix-command flakes" shell \
+      --inputs-from "path:$repo/nix" nixpkgs#curl \
+      --command bash "$repo/scripts/setup-homebrew.sh" "$action"
+  fi
   echo "==> Installing Homebrew"
   installer="$(mktemp)"
   trap 'rm -f "$installer"' EXIT

@@ -56,4 +56,36 @@ if PATH="$target/bin:$PATH" BREW_TEST_OS=FreeBSD bash "$repo/scripts/setup-homeb
   exit 1
 fi
 [[ ! -s "$BREW_TEST_LOG" ]]
+
+# Reproduce a container with Nix installed but curl absent from the outer PATH.
+mkdir -p "$target/isolated" "$target/download"
+for tool in bash dirname mktemp rm; do
+  ln -s "$(command -v "$tool")" "$target/isolated/$tool"
+done
+cp "$target/bin/uname" "$target/isolated/uname"
+printf '#!/bin/sh\necho 1000\n' > "$target/isolated/id"
+cat > "$target/isolated/nix" <<'EOF'
+#!/bin/sh
+printf '%s\n' "$*" >> "$BREW_TEST_LOG"
+while [ "$1" != --command ]; do shift; done
+shift
+PATH="$BREW_TEST_DOWNLOAD:$PATH" exec "$@"
+EOF
+cat > "$target/download/curl" <<'EOF'
+#!/bin/sh
+for arg do installer="$arg"; done
+/bin/cat > "$installer" <<'INSTALL'
+[ "$NONINTERACTIVE" = 1 ] || exit 1
+/bin/mkdir -p "$HOME/.linuxbrew/bin"
+/bin/cp "$BREW_TEST_BREW" "$HOME/.linuxbrew/bin/brew"
+INSTALL
+EOF
+chmod +x "$target/isolated/id" "$target/isolated/nix" "$target/download/curl"
+: > "$BREW_TEST_LOG"
+HOME="$target/home" PATH="$target/isolated" BREW_TEST_DOWNLOAD="$target/download" \
+  BREW_TEST_BREW="$target/bin/brew" /bin/bash "$repo/scripts/setup-homebrew.sh" bundle > "$target/output"
+expected=$(printf '%s\nshellenv\nbundle install --file=%s/Brewfile --no-upgrade' \
+  "--extra-experimental-features nix-command flakes shell --inputs-from path:$repo/nix nixpkgs#curl --command bash $repo/scripts/setup-homebrew.sh bundle" "$repo")
+[[ "$(cat "$BREW_TEST_LOG")" = "$expected" ]]
 echo 'homebrew: macOS/Linux reuse, shellenv, bundle/check flags, failure propagation, invalid action and unsupported OS passed'
+echo 'homebrew: missing curl supplied through pinned Nix shell passed'

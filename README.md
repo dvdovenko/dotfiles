@@ -37,7 +37,7 @@ override it. The macOS Nix target is specific to `danylo-mbp`; the Linux target
 uses the current user and detects x86_64 or aarch64.
 
 `DOTFILES_PROFILE=core` is the default on both systems. It includes Devbox,
-Codex, Claude Code, RTK, Git LFS, OpenSSH, and the usual shell/editor tools.
+Codex, Claude Code, RTK, Git LFS, OpenSSH, curl, and the usual shell/editor tools.
 Use `DOTFILES_PROFILE=full ./scripts/bootstrap.sh` or
 `make vps-build DOTFILES_PROFILE=full` to include standalone language runtimes
 and build tools. Projects can supply these through Devbox or devcontainers.
@@ -56,6 +56,8 @@ Xcode Command Line Tools; Linux needs a compiler/build tools, procps, curl,
 file, and Git (on Ubuntu: `sudo apt-get install build-essential procps curl file git`).
 The installer runs noninteractively, so fresh installations need available sudo
 credentials. Setup reuses an existing `brew`, including one outside `PATH`.
+If Nix is installed but `curl` is missing from `PATH`, setup supplies it from
+the pinned nixpkgs input before Home Manager activation.
 
 ```sh
 make brew-install  # Install Homebrew only
