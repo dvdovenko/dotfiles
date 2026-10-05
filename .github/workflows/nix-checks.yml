@@ -26,6 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/check-homebrew.sh
+      - run: bash scripts/check-profiles.sh
       - uses: DeterminateSystems/nix-installer-action@main
       - run: |
           target="$(mktemp -d)"
@@ -40,7 +41,6 @@ jobs:
   linux:
     strategy:
       matrix:
-        target: [vps, vps-full]
         system: [x86_64-linux, aarch64-linux]
         include:
           - system: x86_64-linux
@@ -53,9 +53,9 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
       - run: |
           for system in x86_64-linux aarch64-linux; do
-            nix eval --impure "./nix#homeConfigurations.\"${{ matrix.target }}@$system\".activationPackage.drvPath"
+            nix eval --impure "./nix#homeConfigurations.\"vps@$system\".activationPackage.drvPath"
           done
-          nix build --impure './nix#homeConfigurations."${{ matrix.target }}@${{ matrix.system }}".activationPackage' --no-link
+          nix build --impure './nix#homeConfigurations."vps@${{ matrix.system }}".activationPackage' --no-link
           nix shell --inputs-from ./nix nixpkgs#zsh -c bash scripts/check-shell.sh
 
   darwin:

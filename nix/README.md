@@ -30,19 +30,21 @@ chezmoi's local config records the checkout path. Do not place machine-local
 Git identities or installed plugins in `home/`.
 
 The Ubuntu devcontainer runs `scripts/bootstrap.sh` after creation and mounts
-the checkout at `/home/vscode/dotfiles`. CI evaluates both profiles on both Linux architectures and builds each
-natively on Linux and Apple Silicon. It also checks a chezmoi apply in an
+the checkout at `/home/vscode/dotfiles`. CI evaluates core on both Linux architectures and builds it
+natively on Linux; Apple Silicon builds both profiles. It also checks a chezmoi apply in an
 isolated destination.
 
 ## Profiles
 
-All Make commands accept `DOTFILES_PROFILE=core|full` (default: `core`).
-Core keeps the existing names; full uses `danylo-mbp-full` and
-`vps-full@x86_64-linux` / `vps-full@aarch64-linux`.
+The default is `DOTFILES_PROFILE=core`. macOS accepts `core|full`; full uses
+`danylo-mbp-full`. Linux/VPS supports only core, with targets
+`vps@x86_64-linux` / `vps@aarch64-linux`. `make vps-build`, `make vps-switch`,
+and Linux bootstrap reject `DOTFILES_PROFILE=full`.
 Linux targets retain generic Linux integration but disable GPU and MIME setup.
 Both profiles use the same locked inputs; launchers use `--inputs-from ./nix`.
 
 Run `bash scripts/check-shell.sh` for isolated startup validation.
+Run `make check-profiles` to check profile selection without activation.
 For a fresh-host transfer trace, record network receive bytes before and after
 Nix installation, flake/launcher fetches, package activation, and explicit plugin
 installation separately. `nix build --dry-run` reports package downloads and

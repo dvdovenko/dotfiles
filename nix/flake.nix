@@ -61,8 +61,6 @@
     homeConfigurations = {
       "vps@x86_64-linux" = mkVpsHome "core" "x86_64-linux";
       "vps@aarch64-linux" = mkVpsHome "core" "aarch64-linux";
-      "vps-full@x86_64-linux" = mkVpsHome "full" "x86_64-linux";
-      "vps-full@aarch64-linux" = mkVpsHome "full" "aarch64-linux";
     };
   };
 }

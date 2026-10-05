@@ -38,9 +38,11 @@ uses the current user and detects x86_64 or aarch64.
 
 `DOTFILES_PROFILE=core` is the default on both systems. It includes Devbox,
 Codex, Claude Code, RTK, Git LFS, OpenSSH, curl, and the usual shell/editor tools.
-Use `DOTFILES_PROFILE=full ./scripts/bootstrap.sh` or
-`make vps-build DOTFILES_PROFILE=full` to include standalone language runtimes
-and build tools. Projects can supply these through Devbox or devcontainers.
+On macOS, use `DOTFILES_PROFILE=full ./scripts/bootstrap.sh` or
+`make darwin-build DOTFILES_PROFILE=full` to include standalone language runtimes
+and build tools. Linux/VPS/devcontainers support only `core`; selecting `full`
+fails before bootstrap changes the machine. Projects supply runtimes through
+Devbox or devcontainers.
 Existing installations and local configuration are retained.
 
 Install editor tools explicitly with `:MasonInstall <tool>` and parsers with
@@ -102,7 +104,7 @@ An interleaved local warm-start benchmark (10 measured runs per version after
 measured median **315.25 ms before / 184.3 ms after**, about **42% faster**.
 This measures non-login interactive zsh startup on the current Mac, not a fresh VPS.
 
-CI covers native Linux builds for both architectures and profiles. Clean Linux
+CI covers native Linux core builds for both architectures and both macOS profiles. Clean Linux
 bootstrap, Git/LFS editing, SSH, NvChad, tmux navigation/popups, CLI versions, and
 a staged fresh-VPS transfer trace remain unverified locally. No configurations
 were activated, applications removed, hosts deployed, or garbage collection run.

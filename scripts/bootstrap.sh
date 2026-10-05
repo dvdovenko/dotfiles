@@ -41,6 +41,11 @@ esac
 os="$(uname -s)"
 arch="$(uname -m)"
 
+if [ "$os" = Linux ] && [ "$DOTFILES_PROFILE" != core ]; then
+  echo "bootstrap: Linux/VPS supports only DOTFILES_PROFILE=core" >&2
+  exit 1
+fi
+
 case "$arch" in
   x86_64) vps_arch="x86_64" ;;
   aarch64|arm64) vps_arch="aarch64" ;;
@@ -114,9 +119,9 @@ if [ "$os" = "Darwin" ]; then
   sudo -H "$(command -v nix)" run --inputs-from "path:$DOTFILES_DIR/nix" \
     nix-darwin -- switch --flake "path:$DOTFILES_DIR/nix#danylo-mbp${profile_suffix}"
 else
-  echo "==> Activating home-manager config (vps${profile_suffix}@${vps_arch}-linux)"
+  echo "==> Activating home-manager config (vps@${vps_arch}-linux)"
   nix run --extra-experimental-features "nix-command flakes" \
-    --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps${profile_suffix}@${vps_arch}-linux" --impure
+    --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps@${vps_arch}-linux" --impure
 fi
 
 "$DOTFILES_DIR/scripts/apply-dotfiles.sh"

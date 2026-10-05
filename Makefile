@@ -5,9 +5,14 @@ ifneq ($(DOTFILES_PROFILE),full)
 $(error DOTFILES_PROFILE must be core or full)
 endif
 endif
+ifneq ($(filter vps-switch vps-build,$(MAKECMDGOALS)),)
+ifneq ($(DOTFILES_PROFILE),core)
+$(error VPS supports only DOTFILES_PROFILE=core)
+endif
+endif
 PROFILE_SUFFIX := $(if $(filter full,$(DOTFILES_PROFILE)),-full,)
 
-.PHONY: bootstrap plugins-install check-shell check-homebrew brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-build vps-switch vps-build dotfiles-apply
+.PHONY: bootstrap plugins-install check-shell check-homebrew check-profiles brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-build vps-switch vps-build dotfiles-apply
 
 # OS/arch-detecting bootstrap: installs Nix if missing, clones this repo if
 # missing, and runs the right first-time switch for the current machine.
@@ -48,13 +53,13 @@ VPS_ARCH := $(if $(filter x86_64,$(UNAME_M)),x86_64,$(if $(filter aarch64 arm64,
 # building the Linux target needs a configured remote/linux builder.
 vps-switch:
 	nix run --extra-experimental-features "nix-command flakes" \
-		--inputs-from "path:$(CURDIR)/nix" home-manager -- switch --flake ./nix#vps$(PROFILE_SUFFIX)@$(VPS_ARCH)-linux --impure
+		--inputs-from "path:$(CURDIR)/nix" home-manager -- switch --flake ./nix#vps@$(VPS_ARCH)-linux --impure
 	./scripts/apply-dotfiles.sh
 
 # Build only, no activation.
 vps-build:
 	nix build --extra-experimental-features "nix-command flakes" --impure \
-		./nix#homeConfigurations."vps$(PROFILE_SUFFIX)@$(VPS_ARCH)-linux".activationPackage --no-link
+		./nix#homeConfigurations."vps@$(VPS_ARCH)-linux".activationPackage --no-link
 
 # Explicit installation for new machines; regular switches only apply config.
 plugins-install:
@@ -65,6 +70,9 @@ check-shell:
 
 check-homebrew:
 	bash scripts/check-homebrew.sh
+
+check-profiles:
+	bash scripts/check-profiles.sh
 
 brew-install:
 	bash scripts/setup-homebrew.sh
