@@ -14,4 +14,3 @@ done
 clone amix/vimrc "$HOME/.vim_runtime"
 clone tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
 TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/" "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
-nvim --headless '+Lazy! install' +qa

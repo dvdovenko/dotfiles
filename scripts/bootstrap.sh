@@ -17,6 +17,17 @@
 
 set -euo pipefail
 
+nix_only=false
+case "${1:-}" in
+  '') ;;
+  --nix-only) nix_only=true ;;
+  *) echo 'Usage: bootstrap.sh [--nix-only]' >&2; exit 2 ;;
+esac
+if [ "$#" -gt 1 ]; then
+  echo 'Usage: bootstrap.sh [--nix-only]' >&2
+  exit 2
+fi
+
 # home-manager's own activation script (and our flake's builtins.getEnv
 # "USER") both expect $USER — a real login shell always has it, but a bare
 # `docker exec`/cron/some Ansible become setups only guarantee $HOME.
@@ -110,7 +121,10 @@ fi
 
 cd "$DOTFILES_DIR"
 
-bash "$DOTFILES_DIR/scripts/setup-homebrew.sh"
+# nix-darwin also owns declarative Homebrew packages on macOS.
+if [ "$nix_only" = false ] || [ "$os" = Darwin ]; then
+  bash "$DOTFILES_DIR/scripts/setup-homebrew.sh"
+fi
 
 if [ "$os" = "Darwin" ]; then
   # darwin/configuration.nix is tied to one specific machine (hostname +
@@ -124,8 +138,9 @@ else
     --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps@${vps_arch}-linux" --impure
 fi
 
-"$DOTFILES_DIR/scripts/apply-dotfiles.sh"
-
-"$DOTFILES_DIR/scripts/install-plugins.sh"
+if [ "$nix_only" = false ]; then
+  "$DOTFILES_DIR/scripts/apply-dotfiles.sh"
+  "$DOTFILES_DIR/scripts/install-plugins.sh"
+fi
 
 echo "==> Done."

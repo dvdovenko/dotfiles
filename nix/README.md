@@ -15,7 +15,16 @@ after the first Nix switch.
 | macOS build only | `make darwin-build` |
 | Linux switch | `make vps-switch` |
 | Linux build only | `make vps-build` |
+| Nix activation only (current OS) | `make nix-install` |
+| macOS Nix activation only | `make darwin-nix-switch` |
+| Linux Nix activation only | `make vps-nix-switch` |
 | Dotfiles only | `make dotfiles-apply` |
+
+For first installation without applying dotfiles, run
+`./scripts/bootstrap.sh --nix-only`. On Linux this also skips Homebrew and plugins.
+macOS retains the existing nix-darwin system settings and Homebrew activation.
+Neovim plugins install at first launch; `make nvim-plugins-install` installs them
+explicitly in advance.
 
 `make bootstrap` also installs Nix and clones the repo if necessary. On macOS,
 Nix is expected to use the Determinate Systems installer; `nix.enable = false`

@@ -14,7 +14,8 @@ installs the files in `home/` into `$HOME`. The same repository supports the
 chezmoi copies tracked config files into `$HOME`. oh-my-zsh, the zsh plugin
 loader, TPM, and Neovim keep their existing plugin managers. Bootstrap installs
 plugins explicitly with `scripts/install-plugins.sh`; shell startup never installs
-tools or clones repositories. Local Git
+tools or clones repositories. Neovim plugins install on the first `nvim` launch
+through lazy.nvim; use `make nvim-plugins-install` to install them in advance. Local Git
 identities in `~/.config/git/conf.d/*.gitconfig`, plugin clones, histories, and
 caches stay outside chezmoi's source state.
 
@@ -48,6 +49,20 @@ Devbox or devcontainers. Install Devbox separately for standalone Linux project
 environments; the eBazar devcontainer image already includes it, and its
 `devbox.json` supplies AI CLI tools and runtimes.
 Existing installations and local configuration are retained.
+
+Install the stages separately from the repository root:
+
+```sh
+./scripts/bootstrap.sh --nix-only  # First install: Nix and its configuration
+make nix-install                 # Activate Nix with Nix already installed
+make dotfiles-apply              # Apply config files with chezmoi installed
+make plugins-install            # Install shell, Vim and tmux plugins explicitly
+```
+
+On Linux, `--nix-only` skips Homebrew, chezmoi application and plugin installation.
+On macOS, Nix activation also applies the existing system settings and declarative
+Homebrew packages; first bootstrap still prepares Homebrew for that configuration.
+The default bootstrap continues to install both Nix and dotfiles.
 
 Install editor tools explicitly with `:MasonInstall <tool>` and parsers with
 `:TSInstall <language>`; neither is installed in bulk at startup.

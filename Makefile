@@ -5,14 +5,14 @@ ifneq ($(DOTFILES_PROFILE),full)
 $(error DOTFILES_PROFILE must be core or full)
 endif
 endif
-ifneq ($(filter vps-switch vps-build,$(MAKECMDGOALS)),)
+ifneq ($(filter vps-switch vps-nix-switch vps-build $(if $(filter Darwin,$(shell uname -s)),,nix-install),$(MAKECMDGOALS)),)
 ifneq ($(DOTFILES_PROFILE),core)
 $(error VPS supports only DOTFILES_PROFILE=core)
 endif
 endif
 PROFILE_SUFFIX := $(if $(filter full,$(DOTFILES_PROFILE)),-full,)
 
-.PHONY: bootstrap plugins-install check-shell check-homebrew check-profiles brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-build vps-switch vps-build dotfiles-apply
+.PHONY: bootstrap nix-install nvim-plugins-install plugins-install check-shell check-homebrew check-profiles brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-nix-switch darwin-build vps-switch vps-nix-switch vps-build dotfiles-apply
 
 # OS/arch-detecting bootstrap: installs Nix if missing, clones this repo if
 # missing, and runs the right first-time switch for the current machine.
@@ -25,13 +25,15 @@ bootstrap:
 # Nix to already be installed (see nix/README.md).
 darwin-bootstrap:
 	bash scripts/setup-homebrew.sh
-	sudo -H $(shell command -v nix) run --inputs-from "path:$(CURDIR)/nix" nix-darwin -- switch --flake "path:$(CURDIR)/nix#danylo-mbp$(PROFILE_SUFFIX)"
+	$(MAKE) darwin-nix-switch
 	./scripts/apply-dotfiles.sh
 
 # Every update after the first: rebuild and activate.
-darwin-switch:
-	sudo -H $(shell command -v nix) run --inputs-from "path:$(CURDIR)/nix" nix-darwin -- switch --flake "path:$(CURDIR)/nix#danylo-mbp$(PROFILE_SUFFIX)"
+darwin-switch: darwin-nix-switch
 	./scripts/apply-dotfiles.sh
+
+darwin-nix-switch:
+	sudo -H $(shell command -v nix) run --inputs-from "path:$(CURDIR)/nix" nix-darwin -- switch --flake "path:$(CURDIR)/nix#danylo-mbp$(PROFILE_SUFFIX)"
 
 dotfiles-apply:
 	./scripts/apply-dotfiles.sh
@@ -47,14 +49,19 @@ darwin-build:
 UNAME_M := $(shell uname -m)
 VPS_ARCH := $(if $(filter x86_64,$(UNAME_M)),x86_64,$(if $(filter aarch64 arm64,$(UNAME_M)),aarch64,unknown))
 
+# Existing Nix installation; bootstrap --nix-only handles fresh machines.
+nix-install: $(if $(filter Darwin,$(shell uname -s)),darwin-nix-switch,vps-nix-switch)
+
 # Standalone home-manager switch for a Linux/VPS box (any user, see
 # nix/README.md). --impure is required: the flake reads $USER/$HOME. Run
 # these ON the target Linux box (or a devcontainer/VM) — from macOS,
 # building the Linux target needs a configured remote/linux builder.
-vps-switch:
+vps-switch: vps-nix-switch
+	./scripts/apply-dotfiles.sh
+
+vps-nix-switch:
 	nix run --extra-experimental-features "nix-command flakes" \
 		--inputs-from "path:$(CURDIR)/nix" home-manager -- switch --flake ./nix#vps@$(VPS_ARCH)-linux --impure
-	./scripts/apply-dotfiles.sh
 
 # Build only, no activation.
 vps-build:
@@ -64,6 +71,9 @@ vps-build:
 # Explicit installation for new machines; regular switches only apply config.
 plugins-install:
 	./scripts/install-plugins.sh
+
+nvim-plugins-install:
+	nvim --headless '+Lazy! install' +qa
 
 check-shell:
 	bash scripts/check-shell.sh
