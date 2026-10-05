@@ -6,22 +6,22 @@
 { pkgs, profile ? "core" }:
 
 with pkgs; [
-  # core dev tooling
+  # VPS/devcontainers: project runtimes come from Devbox.
   git
   git-lfs
   openssh
-  rsync
   unzip
   less
   file
   rtk
-  devbox
-  codex
-  claude-code
   gh
   curl
   delta
-  gnupg
+  watchman
+  tree
+  just
+  ncdu
+  htop
 
   # shell/CLI ergonomics
   ripgrep
@@ -30,13 +30,8 @@ with pkgs; [
   bat
   eza
   zoxide
-  tree
   jq
-  just
-  ncdu
-  tig
   lazygit
-  htop
 
   # editors / multiplexer / prompt
   tmux
@@ -44,18 +39,24 @@ with pkgs; [
   starship
   chezmoi
 
-  # build essentials
+  # Commands used by bootstrap and this repository.
   coreutils
   gnumake
 
-  # misc
+] ++ lib.optionals (profile == "full") [
+  # Home setup: extra diagnostics, credentials and standalone toolchains.
+  rsync
+  gnupg
+  tig
   pass
   uv
   sshpass
   mkcert
-] ++ lib.optionals (profile == "full") [
+
+  devbox
+  codex
+  claude-code
   trash-cli
-  watchman
   automake
   libtool
   pkg-config

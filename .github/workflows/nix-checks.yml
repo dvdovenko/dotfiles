@@ -26,8 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: bash scripts/check-homebrew.sh
-      - run: bash scripts/check-profiles.sh
       - uses: DeterminateSystems/nix-installer-action@main
+      - run: bash scripts/check-profiles.sh --nix
       - run: |
           target="$(mktemp -d)"
           nix shell --inputs-from ./nix nixpkgs#chezmoi -c chezmoi --source "$PWD" --destination "$target" apply

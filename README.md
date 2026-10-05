@@ -36,13 +36,17 @@ The default checkout is `~/dotfiles`. `DOTFILES_DIR` and `DOTFILES_REPO` can
 override it. The macOS Nix target is specific to `danylo-mbp`; the Linux target
 uses the current user and detects x86_64 or aarch64.
 
-`DOTFILES_PROFILE=core` is the default on both systems. It includes Devbox,
-Codex, Claude Code, RTK, Git LFS, OpenSSH, curl, and the usual shell/editor tools.
+`DOTFILES_PROFILE=core` is the default on both systems. It includes RTK,
+Git LFS, OpenSSH, curl, and the usual shell/editor tools.
 On macOS, use `DOTFILES_PROFILE=full ./scripts/bootstrap.sh` or
-`make darwin-build DOTFILES_PROFILE=full` to include standalone language runtimes
-and build tools. Linux/VPS/devcontainers support only `core`; selecting `full`
+`make darwin-build DOTFILES_PROFILE=full` for the home setup. `full` adds Devbox,
+Codex, Claude Code, rsync, GnuPG/pass, tig, uv, sshpass, mkcert, standalone language
+runtimes and build tools.
+Linux/VPS/devcontainers support only `core`; selecting `full`
 fails before bootstrap changes the machine. Projects supply runtimes through
-Devbox or devcontainers.
+Devbox or devcontainers. Install Devbox separately for standalone Linux project
+environments; the eBazar devcontainer image already includes it, and its
+`devbox.json` supplies AI CLI tools and runtimes.
 Existing installations and local configuration are retained.
 
 Install editor tools explicitly with `:MasonInstall <tool>` and parsers with
@@ -69,7 +73,7 @@ make brew-check    # Check Brewfile packages without installing or upgrading
 
 macOS packages remain managed by `nix/darwin/homebrew.nix`, including casks.
 The root `Brewfile` adds optional Linux tools; bootstrap does not install those
-packages automatically. Both Nix profiles keep their existing package lists.
+packages automatically. Homebrew packages are separate from the Nix CLI profiles.
 Bundle installation disables automatic updates and upgrades, and never runs
 cleanup. [Brewfile](https://docs.brew.sh/Brew-Bundle-and-Brewfile) does not pin
 versions. Login zsh initializes an existing Homebrew installation while keeping
@@ -96,7 +100,8 @@ and devcontainer details.
 On 2026-10-01, both Linux profiles evaluated on x86_64 and aarch64;
 both Apple Silicon profiles built without activation. The isolated shell check
 passed, and the retained nixpkgs, Home Manager, and nix-darwin locks were unchanged.
-The x86_64 Linux core dry run reported **683.5 MiB download / 2.1 GiB unpacked**.
+Before the current core reduction, the x86_64 Linux core dry run reported
+**683.5 MiB download / 2.1 GiB unpacked**; this is a historical measurement.
 This excludes Nix installation, flake sources, and plugin downloads.
 
 An interleaved local warm-start benchmark (10 measured runs per version after

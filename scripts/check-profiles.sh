@@ -26,7 +26,7 @@ for arch in x86_64 aarch64; do
 done
 for profile in core full; do
   suffix=""
-  [ "$profile" != full ] || suffix=-full
+  [ "$profile" = core ] || suffix=-full
   output="$(make -s -n -C "$repo" darwin-build DOTFILES_PROFILE="$profile")"
   [[ "$output" == *"danylo-mbp$suffix.system"* ]]
 done
@@ -37,4 +37,25 @@ if PATH="$target/bin:$PATH" DOTFILES_PROFILE=full bash "$repo/scripts/bootstrap.
   exit 1
 fi
 grep -q 'Linux/VPS supports only DOTFILES_PROFILE=core' "$target/output"
-echo 'profiles: VPS core only on both architectures, macOS core/full preserved'
+echo 'profiles: VPS core only on both architectures, macOS core/full'
+
+if [ "${1:-}" = --nix ]; then
+  cd "$repo"
+  nix eval --impure --json --expr '
+    let
+      f = builtins.getFlake (toString ./nix);
+      check = system: let
+        pkgs = import f.inputs.nixpkgs { inherit system; config.allowUnfree = true; };
+        names = profile: map pkgs.lib.getName (import ./nix/shared/cli-packages.nix { inherit pkgs profile; });
+        core = names "core";
+        full = names "full";
+        homeOnly = [ "devbox" "codex" "claude-code" "gnupg" "uv" "rustup" "go" "python3" "pipx" ];
+      in
+        assert builtins.all (p: !(builtins.elem p core) && builtins.elem p full) homeOnly;
+        assert builtins.all (p: builtins.elem p full) core;
+        { inherit system; corePackages = builtins.length core; fullPackages = builtins.length full; };
+    in
+      assert builtins.attrNames f.homeConfigurations == [ "vps@aarch64-linux" "vps@x86_64-linux" ];
+      map check [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ]
+  '
+fi

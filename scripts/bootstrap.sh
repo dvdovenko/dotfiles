@@ -13,7 +13,7 @@
 #   make bootstrap
 #
 # Env overrides: DOTFILES_DIR (default ~/dotfiles), DOTFILES_REPO,
-# DOTFILES_PROFILE (core, or full for standalone language toolchains).
+# DOTFILES_PROFILE (core for VPS, full for home).
 
 set -euo pipefail
 
