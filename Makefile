@@ -1,16 +1,12 @@
-DOTFILES_PROFILE ?= core
+HOST_OS := $(shell uname -s)
+PROFILE_OS := $(if $(filter vps-switch vps-nix-switch vps-build,$(MAKECMDGOALS)),Linux,$(if $(filter darwin-bootstrap darwin-switch darwin-nix-switch darwin-build,$(MAKECMDGOALS)),Darwin,$(HOST_OS)))
+DOTFILES_PROFILE ?= $(if $(filter Darwin,$(PROFILE_OS)),core,slim)
 export DOTFILES_PROFILE
-ifneq ($(DOTFILES_PROFILE),core)
-ifneq ($(DOTFILES_PROFILE),full)
-$(error DOTFILES_PROFILE must be core or full)
+SUPPORTED_PROFILES := $(if $(filter Darwin,$(PROFILE_OS)),core full,slim core)
+ifeq ($(filter $(DOTFILES_PROFILE),$(SUPPORTED_PROFILES)),)
+$(error $(PROFILE_OS) supports only DOTFILES_PROFILE: $(SUPPORTED_PROFILES))
 endif
-endif
-ifneq ($(filter vps-switch vps-nix-switch vps-build $(if $(filter Darwin,$(shell uname -s)),,nix-install),$(MAKECMDGOALS)),)
-ifneq ($(DOTFILES_PROFILE),core)
-$(error VPS supports only DOTFILES_PROFILE=core)
-endif
-endif
-PROFILE_SUFFIX := $(if $(filter full,$(DOTFILES_PROFILE)),-full,)
+PROFILE_SUFFIX := $(if $(filter core,$(DOTFILES_PROFILE)),,-$(DOTFILES_PROFILE))
 
 .PHONY: bootstrap nix-install nvim-plugins-install plugins-install check-shell check-homebrew check-profiles brew-install brew-bundle brew-check darwin-bootstrap darwin-switch darwin-nix-switch darwin-build vps-switch vps-nix-switch vps-build dotfiles-apply
 
@@ -61,12 +57,12 @@ vps-switch: vps-nix-switch
 
 vps-nix-switch:
 	nix run --extra-experimental-features "nix-command flakes" \
-		--inputs-from "path:$(CURDIR)/nix" home-manager -- switch --flake ./nix#vps@$(VPS_ARCH)-linux --impure
+		--inputs-from "path:$(CURDIR)/nix" home-manager -- switch --flake ./nix#vps@$(VPS_ARCH)-linux$(PROFILE_SUFFIX) --impure
 
 # Build only, no activation.
 vps-build:
 	nix build --extra-experimental-features "nix-command flakes" --impure \
-		./nix#homeConfigurations."vps@$(VPS_ARCH)-linux".activationPackage --no-link
+		./nix#homeConfigurations."vps@$(VPS_ARCH)-linux$(PROFILE_SUFFIX)".activationPackage --no-link
 
 # Explicit installation for new machines; regular switches only apply config.
 plugins-install:

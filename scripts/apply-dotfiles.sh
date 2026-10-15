@@ -13,7 +13,7 @@ fi
 # the repo. Copy their contents first: plugins and local git identities live
 # there too, but are intentionally absent from chezmoi's source state.
 backup_dir=''
-for relative in .zshenv .gitconfig .vimrc .config/starship.toml .config/zsh .config/tmux .config/nvim .config/git; do
+for relative in .zshenv .gitconfig .config/starship.toml .config/zsh .config/tmux .config/nvim .config/git; do
   target="$HOME/$relative"
   [[ -L "$target" ]] || continue
   if [[ -z "$backup_dir" ]]; then

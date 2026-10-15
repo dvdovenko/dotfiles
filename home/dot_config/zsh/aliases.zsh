@@ -3,20 +3,25 @@
 # Alias
 # ---
 #
-alias vim="nvim"
+alias vim="$EDITOR"
 alias dt="datree"
 alias df="df -h"
 alias grep="rg --color=auto"
 alias diff="diff --color=auto"
 
 # Suffix aliases
-alias -s md="bat"
+if command -v bat >/dev/null 2>&1; then
+  alias -s md="bat"
+  alias -s yaml="bat -l yaml"
+else
+  alias -s md="cat"
+  alias -s yaml="cat"
+fi
 alias -s go="$EDITOR"
 alias -s js="$EDITOR"
 alias -s jsx="$EDITOR"
 alias -s ts="$EDITOR"
 alias -s tsx="$EDITOR"
-alias -s yaml="bat -l yaml"
 alias -s json="jq ."
 
 # global aliases
@@ -111,3 +116,11 @@ alias a="ansible"
 alias ap="ansible-playbook"
 # alias docker="podman"
 # export DOPPLER_TOKEN="$(pass show doppler/token)"
+
+# export EBAZAR_DATABASE_CONNECTION_STRING="$(op read "op://Infrastructure/ansible-vault-prod/database/url")"
+# export MDB_MCP_CONNECTION_STRING="$(op read "op://Infrastructure/ansible-vault-prod/database/url")"
+# export RYBBIT_API_KEY="$(op read "op://Infrastructure/ansible-vault-prod/rybbit/api-key")"
+
+# export CONTEXT7_API_KEY="$(op read "op://Infrastructure/context-7/api-key")"
+# export MCP_STITCH_API_KEY="$(op read "op://Infrastructure/stitch/api-key")"
+# export ALPHA_SMS_API_KEY="$(op read "op://Infrastructure/alphasms/api-key")"

@@ -5,7 +5,11 @@
 # everywhere — OS-specific or tap-only tools stay in darwin/homebrew.nix.
 { pkgs, profile ? "core" }:
 
-with pkgs; [
+with pkgs; if profile == "slim" then [
+  gitMinimal openssh curl less
+  zsh tmux starship chezmoi coreutils gnumake gnused nano
+  rtk ripgrep fd fzf zoxide jq
+] else [
   # VPS/devcontainers: project runtimes come from Devbox.
   git
   git-lfs
@@ -42,6 +46,10 @@ with pkgs; [
   # Commands used by bootstrap and this repository.
   coreutils
   gnumake
+  gnused
+  devbox
+  codex
+  claude-code
 
 ] ++ lib.optionals (profile == "full") [
   # Home setup: extra diagnostics, credentials and standalone toolchains.
@@ -53,9 +61,6 @@ with pkgs; [
   sshpass
   mkcert
 
-  devbox
-  codex
-  claude-code
   trash-cli
   automake
   libtool

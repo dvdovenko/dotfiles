@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Bootstrap Nix + this dotfiles repo on a fresh box: installs Nix if it's
-# missing, clones (or updates) the repo, installs Homebrew if missing,
+# missing, clones (or updates) the repo, installs Homebrew on macOS if missing,
 # activates the right flake target,
 # then applies the dotfiles with chezmoi. Idempotent on re-run.
 #
@@ -13,7 +13,7 @@
 #   make bootstrap
 #
 # Env overrides: DOTFILES_DIR (default ~/dotfiles), DOTFILES_REPO,
-# DOTFILES_PROFILE (core for VPS, full for home).
+# DOTFILES_PROFILE (Linux: slim|core, macOS: core|full).
 
 set -euo pipefail
 
@@ -42,20 +42,19 @@ fi
 DOTFILES_REPO="${DOTFILES_REPO:-https://github.com/dvdovenko/dotfiles.git}"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 
-DOTFILES_PROFILE="${DOTFILES_PROFILE:-core}"
-case "$DOTFILES_PROFILE" in
-  core) profile_suffix="" ;;
-  full) profile_suffix="-full" ;;
-  *) echo "bootstrap: DOTFILES_PROFILE must be core or full" >&2; exit 1 ;;
-esac
-
 os="$(uname -s)"
 arch="$(uname -m)"
-
-if [ "$os" = Linux ] && [ "$DOTFILES_PROFILE" != core ]; then
-  echo "bootstrap: Linux/VPS supports only DOTFILES_PROFILE=core" >&2
-  exit 1
-fi
+case "$os" in
+  Linux) DOTFILES_PROFILE="${DOTFILES_PROFILE:-slim}"; supported_profiles='slim|core' ;;
+  Darwin) DOTFILES_PROFILE="${DOTFILES_PROFILE:-core}"; supported_profiles='core|full' ;;
+  *) echo "bootstrap: unsupported OS '$os'" >&2; exit 1 ;;
+esac
+case "$os:$DOTFILES_PROFILE" in
+  Linux:slim) profile_suffix=-slim ;;
+  Linux:core|Darwin:core) profile_suffix='' ;;
+  Darwin:full) profile_suffix=-full ;;
+  *) echo "bootstrap: $os supports only DOTFILES_PROFILE=$supported_profiles" >&2; exit 1 ;;
+esac
 
 case "$arch" in
   x86_64) vps_arch="x86_64" ;;
@@ -122,7 +121,7 @@ fi
 cd "$DOTFILES_DIR"
 
 # nix-darwin also owns declarative Homebrew packages on macOS.
-if [ "$nix_only" = false ] || [ "$os" = Darwin ]; then
+if [ "$os" = Darwin ]; then
   bash "$DOTFILES_DIR/scripts/setup-homebrew.sh"
 fi
 
@@ -133,9 +132,9 @@ if [ "$os" = "Darwin" ]; then
   sudo -H "$(command -v nix)" run --inputs-from "path:$DOTFILES_DIR/nix" \
     nix-darwin -- switch --flake "path:$DOTFILES_DIR/nix#danylo-mbp${profile_suffix}"
 else
-  echo "==> Activating home-manager config (vps@${vps_arch}-linux)"
+  echo "==> Activating home-manager config (vps@${vps_arch}-linux${profile_suffix})"
   nix run --extra-experimental-features "nix-command flakes" \
-    --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps@${vps_arch}-linux" --impure
+    --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps@${vps_arch}-linux${profile_suffix}" --impure
 fi
 
 if [ "$nix_only" = false ]; then

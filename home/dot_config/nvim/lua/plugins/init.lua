@@ -5,11 +5,40 @@ return {
     opts = require "configs.conform",
   },
 
-  -- These are some examples, uncomment them if you want to see them work!
+  {
+    "mason-org/mason.nvim",
+    opts = { PATH = "append" },
+  },
+
   {
     "neovim/nvim-lspconfig",
+    dependencies = { "mason-org/mason.nvim" },
     config = function()
       require "configs.lspconfig"
+    end,
+  },
+
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    opts = {
+      panel = { enabled = false },
+      suggestion = { auto_trigger = true },
+    },
+  },
+
+  {
+    "hrsh7th/nvim-cmp",
+    opts = function(_, opts)
+      opts.preselect = require("cmp").PreselectMode.None
+      opts.mapping["<CR>"] = require("cmp").mapping.confirm { select = false }
+      require("cmp").event:on("menu_opened", function()
+        vim.b.copilot_suggestion_hidden = true
+      end)
+      require("cmp").event:on("menu_closed", function()
+        vim.b.copilot_suggestion_hidden = false
+      end)
     end,
   },
 
@@ -18,6 +47,15 @@ return {
     opts = function(_, opts)
       opts.ensure_installed = {}
       opts.auto_install = false
+      if vim.fn.has "mac" == 1 then
+        -- Match Xcode's compiler and SDK even when an inherited SDKROOT points elsewhere.
+        local install = require "nvim-treesitter.install"
+        install.compilers = { "/usr/bin/clang" }
+        local sdk = vim.system({ "/usr/bin/xcrun", "--sdk", "macosx", "--show-sdk-path" }, { text = true }):wait()
+        if sdk.code == 0 then
+          install.command_extra_args["/usr/bin/clang"] = { "-isysroot", vim.trim(sdk.stdout) }
+        end
+      end
     end,
   },
 

@@ -11,6 +11,5 @@ clone ohmyzsh/ohmyzsh "$HOME/.oh-my-zsh"
 for repo in djui/alias-tips zsh-users/zsh-autosuggestions zdharma-continuum/fast-syntax-highlighting; do
   clone "$repo" "${ZDOTDIR:-$HOME/.config/zsh}/plugins/${repo##*/}"
 done
-clone amix/vimrc "$HOME/.vim_runtime"
 clone tmux-plugins/tpm "$HOME/.config/tmux/plugins/tpm"
 TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins/" "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"

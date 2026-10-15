@@ -39,21 +39,36 @@ chezmoi's local config records the checkout path. Do not place machine-local
 Git identities or installed plugins in `home/`.
 
 The Ubuntu devcontainer runs `scripts/bootstrap.sh` after creation and mounts
-the checkout at `/home/vscode/dotfiles`. CI evaluates core on both Linux architectures and builds it
-natively on Linux; Apple Silicon builds both profiles. It also checks a chezmoi apply in an
-isolated destination.
+the checkout at `/home/vscode/dotfiles`. CI builds slim/core on both Linux
+architectures; Apple Silicon builds core/full. It also checks a chezmoi apply
+in an isolated destination.
 
 ## Profiles
 
-The default is `DOTFILES_PROFILE=core`. macOS accepts `core|full`; full uses
-`danylo-mbp-full`.
-Core contains the portable shell/editor and Git/SSH tools;
-full adds Devbox, AI CLI tools, standalone toolchains and credential tools.
-Linux/VPS supports only core, with targets
-`vps@x86_64-linux` / `vps@aarch64-linux`. `make vps-build`, `make vps-switch`,
-and Linux bootstrap reject `DOTFILES_PROFILE=full`.
-Linux targets retain generic Linux integration but disable GPU and MIME setup.
-Both profiles use the same locked inputs; launchers use `--inputs-from ./nix`.
+Linux accepts `slim|core` and defaults to `slim`; macOS accepts `core|full`
+and defaults to `core`. `full` uses `danylo-mbp-full`.
+Core contains the current CLI tools, Neovim/NvChad, Git LFS, Devbox,
+Codex and Claude Code; full adds credential tools, standalone runtimes and build tools.
+
+| Linux profile | Targets |
+| --- | --- |
+| `slim` | `vps@x86_64-linux-slim`, `vps@aarch64-linux-slim` |
+| `core` | `vps@x86_64-linux`, `vps@aarch64-linux` (existing names) |
+
+`slim` installs exactly:
+
+```nix
+gitMinimal openssh curl less
+zsh tmux starship chezmoi coreutils gnumake gnused nano
+rtk ripgrep fd fzf zoxide jq
+```
+
+`slim` disables the Home Manager CLI/manuals, generic Linux integration,
+and user service management. Core retains generic Linux integration with GPU
+and MIME setup disabled. All profiles retain the same locked inputs;
+launchers use `--inputs-from ./nix`. Linux bootstrap skips Homebrew in all modes.
+Use `make vps-build DOTFILES_PROFILE=core` to build the existing core target;
+`make vps-build` builds slim. Unsupported profiles are rejected before activation.
 
 Run `bash scripts/check-shell.sh` for isolated startup validation.
 Run `make check-profiles` to check profile selection without activation.
@@ -64,3 +79,16 @@ Nix installation, flake/launcher fetches, package activation, and explicit plugi
 installation separately. `nix build --dry-run` reports package downloads and
 unpacked store size only; it does not measure the other stages. No fresh VPS
 transfer trace has been verified by these repository checks.
+
+## Disk measurements
+
+Compare runtime closures after builds with `nix path-info --recursive --closure-size`
+on each output, or `nix path-info --json --recursive <output>` and sum `narSize`.
+The package dry run in the approved slim plan reported **622.8 MiB unpacked /
+175.7 MiB download**; this is not the size of the complete Home Manager generation
+or total `/nix/store`. Download estimates also depend on existing cached paths.
+
+VPS activation and old-generation cleanup are separate operations. Before and after
+activation, record the active profile closure, total `/nix/store` usage, and retained
+generations. Do not infer store savings from a package dry run or delete generations
+as part of a build check.

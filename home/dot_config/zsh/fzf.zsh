@@ -15,7 +15,11 @@ export FZF_DEFAULT_OPTS='
   --preview-window=right:65%:wrap:border-left
 '
 
-export _FZF_PREVIEW_CMD='bat --color=always --style=plain,numbers --line-range=:500 {}'
+if command -v bat >/dev/null 2>&1; then
+  export _FZF_PREVIEW_CMD='bat --color=always --style=plain,numbers --line-range=:500 {}'
+else
+  export _FZF_PREVIEW_CMD='cat {}'
+fi
 export FZF_CTRL_T_OPTS="--preview '$_FZF_PREVIEW_CMD'"
 
 # Ctrl+F: file picker excluding hidden files

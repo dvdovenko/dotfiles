@@ -87,8 +87,7 @@ export HOMEBREW_NO_ENV_HINTS=1
 # Uncomment the following line if pasting URLs and other text is messed up.
 DISABLE_MAGIC_FUNCTIONS="true"
 
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # You can also set it to another string to have that shown instead of the default red dots.
@@ -112,6 +111,7 @@ plugins=(
 )
 
 [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+unsetopt CORRECT CORRECT_ALL
 
 # =========================================================
 # Modular Config Files
