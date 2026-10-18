@@ -42,16 +42,20 @@ macOS accepts `core|full`, with `core` as the default.
 
 | Profile | Packages |
 | --- | --- |
-| `slim` | `gitMinimal openssh curl less zsh tmux starship chezmoi coreutils gnumake gnused nano rtk ripgrep fd fzf zoxide jq` |
-| `core` | Current CLI tools, Neovim/NvChad, Git LFS, Devbox, Codex and Claude Code |
+| `slim` | `gitMinimal openssh curl less zsh tmux starship chezmoi coreutils gnumake gnused nano ripgrep fd fzf jq` |
+| `core` | Current CLI tools, Neovim/NvChad, Git LFS and Devbox |
 | `full` | Core plus credential tools, standalone runtimes and build tools |
 
 Use `DOTFILES_PROFILE=core ./scripts/bootstrap.sh` or
-`make vps-switch DOTFILES_PROFILE=core` for a Linux development environment.
+`make vps-switch DOTFILES_PROFILE=core` for a Linux development environment with Linuxbrew and its Brewfile packages.
 On macOS, use `DOTFILES_PROFILE=full ./scripts/bootstrap.sh` or
 `make darwin-build DOTFILES_PROFILE=full` for the full setup.
 Unsupported profiles fail before bootstrap installs packages or updates the checkout.
 Projects can supply runtimes through Devbox or devcontainers.
+On `danylo-mbp` (core/full), Homebrew installs Codex and Claude Code (`latest` channel).
+Linux profiles do not install either CLI. Automatic updates remain deferred;
+on macOS, update them with `brew upgrade --cask codex claude-code@latest`.
+The macOS zsh wrappers prefer Brew binaries while older Nix installs remain active.
 
 Shell and Git use `nvim` when available, otherwise `nano`; Git uses `delta`
 when available, otherwise `less`/`cat`. File previews use `bat` or `cat`,
@@ -128,8 +132,8 @@ nvim --headless -n -i NONE '+luafile home/dot_config/nvim/tests/package_hover.lu
 ## Homebrew and Linuxbrew
 
 macOS bootstrap installs [Homebrew](https://docs.brew.sh/Installation) before Nix
-activation. Linux bootstrap does not install Homebrew; the manual commands below
-remain available. Linuxbrew is Homebrew on Linux, with its standard prefix at
+activation. Linux core bootstrap installs Homebrew and the Linux Brewfile; slim skips it.
+The manual commands below remain available. Linuxbrew is Homebrew on Linux, with its standard prefix at
 `/home/linuxbrew/.linuxbrew`; macOS uses `/opt/homebrew` on Apple Silicon or
 `/usr/local` on Intel. Run as a non-root user with sudo access. macOS needs
 Xcode Command Line Tools; Linux needs a compiler/build tools, procps, curl,

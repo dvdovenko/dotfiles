@@ -44,6 +44,9 @@ printf 'export PATH="%s/bin:$PATH"\n' "$target" > "$target/home/.nix-profile/etc
 export BOOTSTRAP_TEST_LOG="$target/bootstrap.log"
 for script in setup-homebrew apply-dotfiles install-plugins; do
   printf '#!/bin/sh\necho %s >> "$BOOTSTRAP_TEST_LOG"\n' "$script" > "$target/repo/scripts/$script.sh"
+  if [[ "$script" = setup-homebrew ]]; then
+    printf 'echo "brew-args $*" >> "$BOOTSTRAP_TEST_LOG"\n' >> "$target/repo/scripts/$script.sh"
+  fi
   chmod +x "$target/repo/scripts/$script.sh"
 done
 for cmd in nix git sudo; do
@@ -65,7 +68,12 @@ for os in Linux Darwin; do
         DOTFILES_DIR="$target/repo" "${profile_env[@]}" bash "$repo/scripts/bootstrap.sh" "${args[@]}" > "$target/output"
       if [[ "$os" = Linux ]]; then
         grep -q "vps@x86_64-linux$suffix --impure" "$BOOTSTRAP_TEST_LOG"
-        ! grep -qx setup-homebrew "$BOOTSTRAP_TEST_LOG"
+        if [[ "$profile" = core && -z "$mode" ]]; then
+          grep -qx setup-homebrew "$BOOTSTRAP_TEST_LOG"
+          grep -qx "brew-args bundle" "$BOOTSTRAP_TEST_LOG"
+        else
+          ! grep -qx setup-homebrew "$BOOTSTRAP_TEST_LOG"
+        fi
       else
         grep -q "danylo-mbp$suffix" "$BOOTSTRAP_TEST_LOG"
         grep -qx setup-homebrew "$BOOTSTRAP_TEST_LOG"
@@ -121,18 +129,22 @@ if [ "${1:-}" = --nix ]; then
         pkgs = import f.inputs.nixpkgs { inherit system; config.allowUnfree = true; };
         names = profile: map pkgs.lib.getName (import ./nix/shared/cli-packages.nix { inherit pkgs profile; });
         slim = names "slim";
-        expectedSlim = map pkgs.lib.getName (with pkgs; [ gitMinimal openssh curl less zsh tmux starship chezmoi coreutils gnumake gnused nano rtk ripgrep fd fzf zoxide jq ]);
+        expectedSlim = map pkgs.lib.getName (with pkgs; [ gitMinimal openssh curl less zsh tmux starship chezmoi coreutils gnumake gnused nano ripgrep fd fzf jq ]);
         core = names "core";
         full = names "full";
-        homeOnly = [ "gnupg" "uv" "rustup" "go" "python3" "pipx" ];
+        homeOnly = [ "gnupg" "automake" "libtool" ];
       in
         assert slim == expectedSlim;
-        assert builtins.all (p: builtins.elem p core) [ "devbox" "codex" "claude-code" "neovim" "git-lfs" "gnused" ];
+        assert builtins.all (p: builtins.elem p core) [ "devbox" "git-lfs" "gnused" ];
+        assert builtins.all (p: builtins.elem p core == pkgs.stdenv.hostPlatform.isLinux) [ "neovim" "tmux" "starship" ];
+        assert builtins.all (p: !(builtins.elem p full)) [ "codex" "claude-code" "uv" "rustup" "go" "python3" "pipx" ];
         assert builtins.all (p: !(builtins.elem p slim)) [ "neovim" "git-lfs" "delta" "bat" ];
         assert builtins.all (p: !(builtins.elem p core) && builtins.elem p full) homeOnly;
         assert builtins.all (p: builtins.elem p full) core;
         { inherit system; slimPackages = builtins.length slim; corePackages = builtins.length core; fullPackages = builtins.length full; };
     in
+      assert builtins.all (p: builtins.elem p (map (b: b.name) f.darwinConfigurations.danylo-mbp.config.homebrew.brews))
+        [ "neovim" "tmux" "starship" "uv" "go" "node" "fnm" ];
       assert builtins.attrNames f.darwinConfigurations == [ "danylo-mbp" "danylo-mbp-full" ];
       assert builtins.attrNames f.homeConfigurations == [ "vps@aarch64-linux" "vps@aarch64-linux-slim" "vps@x86_64-linux" "vps@x86_64-linux-slim" ];
       assert builtins.all (system: let

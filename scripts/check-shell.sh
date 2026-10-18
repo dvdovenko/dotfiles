@@ -3,6 +3,7 @@ set -euo pipefail
 repo="$(cd "$(dirname "$0")/.." && pwd)"
 zsh_bin="$(command -v zsh)"
 target="$(mktemp -d)"
+export HOMEBREW_PREFIX="$target/brew"
 trap 'rm -rf "$target"' EXIT
 mkdir -p "$target/.config/zsh" "$target/bin"
 cp "$repo/home/dot_zshenv" "$target/.zshenv"
@@ -47,6 +48,21 @@ HOME="$target" ZDOTDIR="$target/.config/zsh" PATH="$target/bin" CODEX_ENV_TEST= 
   [[ $? == 7 ]] || exit 1
 ' > "$target/output" 2>&1 || { cat "$target/output"; exit 1; }
 echo 'Codex: scoped env loading, CODEX_HOME, argument forwarding, missing file and source failure'
+
+# macOS AI commands prefer Brew even while old Nix binaries remain in PATH.
+mkdir -p "$target/brew/bin"
+cp "$target/bin/codex" "$target/brew/bin/codex"
+printf '#!/bin/sh\n[ "$1" = "argument with spaces" ]\n' > "$target/brew/bin/claude"
+chmod +x "$target/brew/bin/claude"
+HOME="$target" ZDOTDIR="$target/.config/zsh" PATH="$target/bin" HOMEBREW_PREFIX="$target/brew" "$zsh_bin" -d -i -c '
+  OSTYPE=darwin
+  # A PATH lookup must still find the old command; the wrapper selects Brew.
+  [[ "$commands[codex]" == "$HOME/bin/codex" ]] || exit 1
+  codex default "argument with spaces" || exit 1
+  claude "argument with spaces" || exit 1
+  [[ -z "${CODEX_ENV_TEST:-}" ]] || exit 1
+' > "$target/output" 2>&1 || { cat "$target/output"; exit 1; }
+echo 'macOS AI CLIs: Brew precedence, argument forwarding and scoped Codex env'
 
 # Login shells may initialize an installed brew, but must not invoke installers.
 cat > "$target/bin/brew" <<'EOF'

@@ -8,8 +8,22 @@ codex() (
     source "$env_file" || return
     set +a
   fi
-  command codex "$@"
+  local brew_codex="${HOMEBREW_PREFIX:-/opt/homebrew}/bin/codex"
+  if [[ "$OSTYPE" == darwin* && -x "$brew_codex" ]]; then
+    "$brew_codex" "$@"
+  else
+    command codex "$@"
+  fi
 )
+
+claude() {
+  local brew_claude="${HOMEBREW_PREFIX:-/opt/homebrew}/bin/claude"
+  if [[ "$OSTYPE" == darwin* && -x "$brew_claude" ]]; then
+    "$brew_claude" "$@"
+  else
+    command claude "$@"
+  fi
+}
 
 # Colormap
 function colormap() {

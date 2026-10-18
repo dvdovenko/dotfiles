@@ -8,7 +8,7 @@
 with pkgs; if profile == "slim" then [
   gitMinimal openssh curl less
   zsh tmux starship chezmoi coreutils gnumake gnused nano
-  rtk ripgrep fd fzf zoxide jq
+  ripgrep fd fzf jq
 ] else [
   # VPS/devcontainers: project runtimes come from Devbox.
   git
@@ -37,10 +37,6 @@ with pkgs; if profile == "slim" then [
   jq
   lazygit
 
-  # editors / multiplexer / prompt
-  tmux
-  neovim
-  starship
   chezmoi
 
   # Commands used by bootstrap and this repository.
@@ -48,27 +44,13 @@ with pkgs; if profile == "slim" then [
   gnumake
   gnused
   devbox
-  codex
-  claude-code
 
+] ++ lib.optionals stdenv.hostPlatform.isLinux [
+  # macOS owns these through Homebrew; Linux core must work without Brew.
+  tmux neovim starship
 ] ++ lib.optionals (profile == "full") [
-  # Home setup: extra diagnostics, credentials and standalone toolchains.
-  rsync
+  # Extra credentials and build tools; macOS runtimes live in Homebrew.
   gnupg
-  tig
-  pass
-  uv
-  sshpass
-  mkcert
-
-  trash-cli
   automake
   libtool
-  pkg-config
-  go
-  fnm
-  nodejs
-  rustup
-  python311
-  pipx
 ]

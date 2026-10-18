@@ -1,5 +1,24 @@
 return {
   {
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {},
+    keys = {
+      { "<leader>qs", function() require("persistence").load() end, desc = "Restore project session" },
+      { "<leader>ql", function() require("persistence").load { last = true } end, desc = "Restore last session" },
+      { "<leader>qS", function() require("persistence").select() end, desc = "Select session" },
+    },
+  },
+
+  {
+    "folke/which-key.nvim",
+    opts = { delay = 300, preset = "modern" },
+    keys = {
+      { "<leader>?", function() require("which-key").show { global = false } end, desc = "Show buffer keymaps" },
+    },
+  },
+
+  {
     "stevearc/conform.nvim",
     -- event = 'BufWritePre', -- uncomment for format on save
     opts = require "configs.conform",
@@ -81,7 +100,7 @@ return {
           hide_gitignored = false,
         },
       },
-      window = { width = 30 },
+      window = { position = "right", width = 30 },
     },
   },
 

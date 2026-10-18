@@ -137,6 +137,10 @@ else
     --inputs-from "path:$DOTFILES_DIR/nix" home-manager -- switch --flake "./nix#vps@${vps_arch}-linux${profile_suffix}" --impure
 fi
 
+if [ "$os" = Linux ] && [ "$DOTFILES_PROFILE" = core ] && [ "$nix_only" = false ]; then
+  bash "$DOTFILES_DIR/scripts/setup-homebrew.sh" bundle
+fi
+
 if [ "$nix_only" = false ]; then
   "$DOTFILES_DIR/scripts/apply-dotfiles.sh"
   "$DOTFILES_DIR/scripts/install-plugins.sh"

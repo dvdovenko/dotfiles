@@ -47,8 +47,11 @@ in an isolated destination.
 
 Linux accepts `slim|core` and defaults to `slim`; macOS accepts `core|full`
 and defaults to `core`. `full` uses `danylo-mbp-full`.
-Core contains the current CLI tools, Neovim/NvChad, Git LFS, Devbox,
-Codex and Claude Code; full adds credential tools, standalone runtimes and build tools.
+Core contains the current CLI tools, Neovim/NvChad, Git LFS and Devbox;
+full adds credential and build tools through Nix; macOS Homebrew owns
+standalone runtimes and Neovim/tmux/Starship. Linux core keeps those three in Nix.
+`danylo-mbp` (core/full) installs Codex and Claude Code (`latest` channel) through
+Homebrew. Linux profiles omit both; automatic updates remain deferred.
 
 | Linux profile | Targets |
 | --- | --- |
@@ -60,13 +63,14 @@ Codex and Claude Code; full adds credential tools, standalone runtimes and build
 ```nix
 gitMinimal openssh curl less
 zsh tmux starship chezmoi coreutils gnumake gnused nano
-rtk ripgrep fd fzf zoxide jq
+ripgrep fd fzf jq
 ```
 
 `slim` disables the Home Manager CLI/manuals, generic Linux integration,
 and user service management. Core retains generic Linux integration with GPU
 and MIME setup disabled. All profiles retain the same locked inputs;
-launchers use `--inputs-from ./nix`. Linux bootstrap skips Homebrew in all modes.
+launchers use `--inputs-from ./nix`. Linux core bootstrap installs Linuxbrew and the Brewfile packages; slim and
+Linux `--nix-only` skip Homebrew.
 Use `make vps-build DOTFILES_PROFILE=core` to build the existing core target;
 `make vps-build` builds slim. Unsupported profiles are rejected before activation.
 
